@@ -3,6 +3,9 @@ use <BOSL/joiners.scad>
 use <BOSL/shapes.scad>
 use <BOSL/transforms.scad>
 
+$fa = 1;
+$fs = 0.4;
+
 
 module innerBoxMask(x, y, z , wallThickness)
 {
@@ -18,12 +21,23 @@ module innerBoxMask(x, y, z , wallThickness)
 };
 
 module lockingNotch(
-    x, y, z)
+    x, y, z,
+    radius,
+    lidOverlap)
 {
-    
+    for(i=[-1:2:1]) 
+    {
+            ymove(i * (y/2)) zmove(z-(lidOverlap/2)) zmove(radius)
+            zscale(-0.5)
+        cyl(r=radius, 
+            h=(x * 0.25),
+            fillet=(radius * 0.5),
+            orient=ORIENT_X,
+            center=true);
+    }
 }
 
-module box(
+module boxShell(
         x, y, z,
         wallThickness,
         floorThickness,
@@ -31,8 +45,8 @@ module box(
         edges=EDGES_TOP + EDGES_Z_ALL + EDGES_BOTTOM,
         center=true )
 {
-    zmove(z/2)
-    intersection() {
+    zmove(z/2) // move bottom to be at zero
+    intersection() { // Creates shell (ineficient but fine, simple difference would be better)
         cuboid(size=[x,y,z], fillet=boxFillet, edges=edges, center=center);
         innerBoxMask(
             x=x,
@@ -40,11 +54,12 @@ module box(
             z=z,
             wallThickness=wallThickness);
     };
+    // create floor
     zmove(floorThickness/2) cuboid(size=[x,y,floorThickness], fillet=boxFillet, edges=edges, center=true);
 };
 
 
-box(
+boxShell(
     x=10,
     y=10,
     z=10,
@@ -53,6 +68,14 @@ box(
     boxFillet=1
     );
 
+
+lockingNotch(
+    x=10,
+    y=10,
+    z=10,
+    radius=0.5,
+    lidOverlap=4
+);
 
 
 /*
