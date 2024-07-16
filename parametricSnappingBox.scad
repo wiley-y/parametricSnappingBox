@@ -10,7 +10,7 @@ x=50;
 y=50;
 z=20;
 lidOverlap=undef;
-topDevisionSize= x / 2;
+topDevisionSize= 25;
 botDevisionSize= x - topDevisionSize;
 boxFillet=1;
 compartementFillet=0;
@@ -18,18 +18,19 @@ outerWallThickness=1;
 innerWallThickness=1;
 innerWallHeight=z;
 topDevisionType="square"; // Square or Scoop
-topXSubDiv=4;
-topYSubDiv=1;
+topXSubDiv=5;
+topYSubDiv=3;
 botDevisionType="square"; // Square or Scoop
 botXSubDiv=3;
-botYSubDiv=1;
+botYSubDiv=2;
+notchRadius=0.6;
 
 topMaskX = ((x - ((outerWallThickness * 2)+(innerWallThickness * (topXSubDiv - 1)))) / topXSubDiv); // two outer walls and n-1 inner walls
-topMaskY = ((topDevisionSize - ((outerWallThickness * 1.5)+(innerWallThickness * (topYSubDiv - 1)))) / topYSubDiv); // 1.5 outer walls and n-1 inner walls
+topMaskY = ((topDevisionSize - ((outerWallThickness)+(innerWallThickness * (topYSubDiv)))) / topYSubDiv); // 1.5 outer walls and n-1 inner walls
 
 
 botMaskX = ((x - ((outerWallThickness * 2)+(innerWallThickness * (botXSubDiv - 1)))) / botXSubDiv); // two outer walls and n-1 inner walls
-botMaskY = ((topDevisionSize - ((outerWallThickness * 1.5)+(innerWallThickness * (botYSubDiv - 1)))) / botYSubDiv); // 1.5 outer walls and n-1 inner walls 
+botMaskY = ((botDevisionSize - ((outerWallThickness)+(innerWallThickness * (botYSubDiv)))) / botYSubDiv); // 1 outer wall and n inner walls 
 
 topDevisionCenter = (x/2) - (topDevisionSize / 2);
 botDevisionCenter = -((x/2) - (botDevisionSize / 2));
@@ -49,21 +50,21 @@ module innerBoxMask(x, y, z , wallThickness)
 };
 */
 
-module lockingNotch(radius)
+module lockingNotch()
 {
     for(i=[-1:2:1]) 
     {
-            ymove(i * (y/2)) zmove(z-(lidOverlap/2)) zmove(radius)
-            zscale(-0.5)
-        cyl(r=radius, 
-            h=(x * 0.25),
-            fillet=(radius * 0.5),
-            orient=ORIENT_X,
+            xmove(i * (x/2)) zmove(z-(lidOverlap/2)) zmove(notchRadius)
+            zscale(-0.8)
+        cyl(r=notchRadius, 
+            h=(y * 0.25),
+            fillet=(notchRadius * 0.5),
+            orient=ORIENT_Y,
             center=true);
     }
 }
 
-module compartementMaskBoxes (xSubDiv, ySubDiv, xSize, ySize, moveAmount) 
+module compartementMaskBoxes (xSubDiv, ySubDiv, xSize, ySize) 
 {
     for(i=[0:1:(xSubDiv-1)])
             xmove(-(x/2)) xmove((xSize / 2) + outerWallThickness) //starting position
@@ -77,33 +78,41 @@ module compartementMaskBoxes (xSubDiv, ySubDiv, xSize, ySize, moveAmount)
         );
 }
 
+module compartementMaskBoxesArray ()
+{
+    for(i = [0:1:(topYSubDiv - 1)])
+        ymove((topMaskY / 2)) ymove(innerWallThickness / 2) // starting position
+        ymove(topMaskY * i) ymove(innerWallThickness * i) // affected by loop
+        compartementMaskBoxes(
+            xSubDiv=topXSubDiv,
+            ySubDiv=topYSubDiv,
+            xSize=topMaskX,
+            ySize=topMaskY,
+    );
+    for(i = [0:1:(botYSubDiv - 1)])
+        ymove(-(botMaskY / 2)) ymove(-(innerWallThickness / 2)) // starting position
+        ymove(-(botMaskY * i)) ymove(-(innerWallThickness * i)) // affected by loop
+        compartementMaskBoxes(
+            xSubDiv=botXSubDiv,
+            ySubDiv=botYSubDiv,
+            xSize=botMaskX,
+            ySize=botMaskY,
+    );
+}
+
 module subdevBox (subdevBoxEdges=EDGES_TOP + EDGES_Z_ALL + EDGES_BOTTOM)
 {
+
     difference() {
         cuboid(
             size=[x,y,z],
             fillet=boxFillet,
             edges=subdevBoxEdges);
         
-        ymove(topDevisionCenter) ymove(-(outerWallThickness/2)) // move to upper portion and make room for wall
-        ymove(-(topMaskY/2)) // starting position for y stacking
-        compartementMaskBoxes(
-            xSubDiv=topXSubDiv,
-            ySubDiv=topYSubDiv,
-            xSize=topMaskX,
-            ySize=topMaskY,
-            moveAmount=botDevisionCenter
-        );
-
-        ymove(botDevisionCenter) ymove(outerWallThickness/2) // move to lower portion and make room for wall
-        compartementMaskBoxes(
-            xSubDiv=botXSubDiv,
-            ySubDiv=botYSubDiv,
-            xSize=botMaskX,
-            ySize=botMaskY,
-            moveAmount=botDevisionCenter
-        );
+        ymove((25 - topDevisionSize)) // offset for difference sizes tops and bots
+        compartementMaskBoxesArray();
     };
+    lockingNotch();
     
 };
 
@@ -147,7 +156,7 @@ boxShell(
 
 
 lockingNotch(
-    radius=0.5,
+    notchRadius=0.5,
     lidOverlap=4
 );
 */
