@@ -12,16 +12,19 @@ x=50;
 y=50;
 z=20;
 
-lidOverlap=10;
+lidOverlap=z; // lidOverlap = z means 100% coverage
+lidHeight = 30;
 lidTolerance = 0.8;
 notchRadius=0.6;
+fingerHoleSize = 10;
+fingerHoleType = "all"; // edges, or all
 
 botDevision = false; 
 topDevisionSize = botDevision==true ? 25 : x;
 botDevisionSize= x - topDevisionSize;
 
 boxFillet=1;
-compartementFillet=2;
+compartementFillet=0;
 
 outerWallThickness=1;
 innerWallThickness=1;
@@ -99,7 +102,6 @@ module lockingNotch()
     for(i=[-1:2:1]) 
     {
             xmove(i * (x/2)) 
-            zmove((z/2)-(lidOverlap/2)) zmove(notchRadius)
             zscale(-0.8)
         cyl(r=notchRadius, 
             h=(y * 0.25),
@@ -112,28 +114,53 @@ module lockingNotch()
 module lid () 
 {
     difference() {
-        cuboid(
+        cuboid( // outer shell
             size = [
                 x + outerWallThickness + lidTolerance, 
                 y + outerWallThickness + lidTolerance, 
-                z + outerWallThickness + lidTolerance],
+                lidHeight + outerWallThickness + lidTolerance],
                 fillet = boxFillet,
                 edges = EDGES_ALL,
                 center = true);
-        zmove(outerWallThickness)
-        cuboid(
+
+        zmove(-outerWallThickness) 
+        cuboid( // inner mask
             size = [
                 x + lidTolerance, 
                 y + lidTolerance, 
-                z + lidTolerance],
+                lidHeight + lidTolerance],
                 fillet = boxFillet,
                 edges = EDGES_Z_ALL + EDGES_BOTTOM);
+
+        zmove(-((lidHeight/2)+lidTolerance))
+        zmove(z/2)
+        lockingNotch(); // notch indents for box to fit into
+
+        cylRotCopies = fingerHoleType=="all" ? 8 : 4;
+        zmove(-((lidHeight/2)+lidTolerance))
+        zrot_copies(n=cylRotCopies)
+        cyl(d = fingerHoleSize, h = x+y, orient = ORIENT_Y, center = true);
+    };
+    
+    if(lidHeight > z) //add reverse entry notch to block over-insertion to large lids and allow for the lid to be used as a tray ala oath orginizers
+    {
+        for(i = [0:1:1])
+            zrot(90 * i)
+            zmove(-((lidHeight/2)+lidTolerance))
+            zmove(z)
+            lockingNotch();
     };
 };
 
 if(generatedPart=="box") {
+    zmove(z/2)
     subdevBox();
 };
 if(generatedPart=="lid") {
     lid();
 };
+if(generatedPart=="test"){
+    subdevBox();
+
+    lid();
+}
