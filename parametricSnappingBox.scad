@@ -3,6 +3,15 @@ use <BOSL/joiners.scad>
 use <BOSL/shapes.scad>
 use <BOSL/transforms.scad>
 
+/*
+Test one : lid needs more tolerance, notch needs to be a little bigger, reverse insertion notch laos needs to be bigger. box should not be this small. 
+
+todo : 
+    fillet cylender type cavities
+    better locking mechanism (just a little bit, it should not be too tough)
+    
+*/
+
 $fa = 1;
 $fs = 0.4;
 
@@ -16,7 +25,7 @@ lidOverlap=z; // lidOverlap = z means 100% coverage
 lidHeight = 30;
 lidTolerance = 0.8;
 notchRadius=0.6;
-fingerHoleSize = 10;
+fingerHoleSize = 8;
 fingerHoleType = "all"; // edges, or all
 
 botDevision = false; 
@@ -30,8 +39,8 @@ outerWallThickness=1;
 innerWallThickness=1;
 innerWallHeight=z;
 
-topXSubDiv=5;
-topYSubDiv=3;
+topXSubDiv=1;
+topYSubDiv=1;
 
 botXSubDiv=3;
 botYSubDiv=2;
@@ -91,6 +100,7 @@ module subdevBox (subdevBoxEdges=EDGES_TOP + EDGES_Z_ALL + EDGES_BOTTOM)
             edges=subdevBoxEdges);
         
         ymove((25 - topDevisionSize)) // offset for difference sizes tops and bots
+        zmove(-(z/2)) // re-alaign with center, jank
         compartementMaskBoxesArray();
     };
     lockingNotch();
@@ -157,6 +167,7 @@ if(generatedPart=="box") {
     subdevBox();
 };
 if(generatedPart=="lid") {
+    zflip()
     lid();
 };
 if(generatedPart=="test"){
