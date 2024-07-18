@@ -4,29 +4,33 @@ use <BOSL/shapes.scad>
 use <BOSL/transforms.scad>
 
 /*
-Test one : lid needs more tolerance, notch needs to be a little bigger, reverse insertion notch laos needs to be bigger. box should not be this small. 
+Test one : Lid needs more boxLipTolerance, notch needs to be a little bigger, reverse insertion notch laos needs to be bigger. box should not be this small. 
 
 todo : 
     fillet cylender type cavities
     better locking mechanism (just a little bit, it should not be too tough)
+
+    i want the Lid locking and Lid removal to be better, the Lid overlap should come down onto a lip as big as the Lid, the Lid locking should be a rounded square ridge
     
 */
 
 $fa = 1;
 $fs = 0.4;
 
-generatedPart = "lid"; //box or lid
+generatedPart = "lid"; //box or Lid
 
-x=50;
-y=50;
+x=100;
+y=200;
 z=20;
 
-lidOverlap=z; // lidOverlap = z means 100% coverage
+boxLipHeight=5; 
 lidHeight = 30;
 lidTolerance = 0.8;
-notchRadius=0.6;
-fingerHoleSize = 8;
-fingerHoleType = "all"; // edges, or all
+lockingRidgeSize = 1;
+lockingRidgeSpacing = ((z-boxLipHeight)*0.2);
+//notchRadius=0.6;
+//fingerHoleSize = 8;
+//fingerHoleType = "all"; // edges, or all
 
 botDevision = false; 
 topDevisionSize = botDevision==true ? 25 : x;
@@ -51,8 +55,16 @@ topMaskY = ((topDevisionSize - ((outerWallThickness)+(innerWallThickness * (topY
 botMaskX = botDevision==true ? ((x - ((outerWallThickness * 2)+(innerWallThickness * (botXSubDiv - 1)))) / botXSubDiv) : undef; // two outer walls and n-1 inner walls
 botMaskY = botDevision==true ? ((botDevisionSize - ((outerWallThickness)+(innerWallThickness * (botYSubDiv)))) / botYSubDiv) : undef; // 1 outer wall and n inner walls 
 
+module FilledBox ()
+{
+    subdevBoxEdges = EDGES_TOP + EDGES_Z_ALL + EDGES_BOTTOM;
+    cuboid(
+        size=[x,y,z],
+        fillet=boxFillet,
+        edges=subdevBoxEdges);
+}
 
-module compartementMaskBoxes (xSubDiv, ySubDiv, xSize, ySize) 
+module CompartementMaskBoxes (xSubDiv, ySubDiv, xSize, ySize) 
 {
     for(i=[0:1:(xSubDiv-1)])
             xmove(-(x/2)) xmove((xSize / 2) + outerWallThickness) //starting position
@@ -66,12 +78,12 @@ module compartementMaskBoxes (xSubDiv, ySubDiv, xSize, ySize)
         );
 };
 
-module compartementMaskBoxesArray ()
+module CompartementMaskBoxesArray ()
 {
     for(i = [0:1:(topYSubDiv - 1)])
         ymove((topMaskY / 2)) ymove(innerWallThickness / 2) // starting position
         ymove(topMaskY * i) ymove(innerWallThickness * i) // affected by loop
-        compartementMaskBoxes(
+        CompartementMaskBoxes(
             xSubDiv=topXSubDiv,
             ySubDiv=topYSubDiv,
             xSize=topMaskX,
@@ -82,7 +94,7 @@ module compartementMaskBoxesArray ()
         for(i = [0:1:(botYSubDiv - 1)])
             ymove(-(botMaskY / 2)) ymove(-(innerWallThickness / 2)) // starting position
             ymove(-(botMaskY * i)) ymove(-(innerWallThickness * i)) // affected by loop
-            compartementMaskBoxes(
+            CompartementMaskBoxes(
                 xSubDiv=botXSubDiv,
                 ySubDiv=botYSubDiv,
                 xSize=botMaskX,
@@ -91,87 +103,155 @@ module compartementMaskBoxesArray ()
     };
 };
 
-module subdevBox (subdevBoxEdges=EDGES_TOP + EDGES_Z_ALL + EDGES_BOTTOM)
+module BoxLip (boxLipTolerance) 
+{
+    cuboid(
+        size=[
+            x + outerWallThickness + boxLipTolerance,
+            y + outerWallThickness + boxLipTolerance,
+            boxLipHeight + (boxLipTolerance*2),
+        ],
+        fillet=boxFillet,
+        edges=EDGES_ALL
+    );
+};
+
+module LockingRidge (lockingRidgeTolerance)
+{
+    //x wall edges
+    yscale(1)
+    difference () {
+        torus( 
+            od = x + lockingRidgeSize + lockingRidgeTolerance,
+            id = x + lockingRidgeTolerance
+        );
+        yscale(y*2) FilledBox();
+    };
+
+    //y wall edges
+    xscale(1)
+    difference () {
+        torus( 
+            od = y + lockingRidgeSize + lockingRidgeTolerance,
+            id = y + lockingRidgeTolerance
+        );
+        xscale(x*2) FilledBox();
+    };
+}
+
+module SubdevBox ()
 {
     difference() {
-        cuboid(
-            size=[x,y,z],
-            fillet=boxFillet,
-            edges=subdevBoxEdges);
+        union() {
+            FilledBox();
+            
+            zmove(-(z/2)) zmove(boxLipHeight/2)
+            BoxLip(0);
+        };
         
         ymove((25 - topDevisionSize)) // offset for difference sizes tops and bots
         zmove(-(z/2)) // re-alaign with center, jank
-        compartementMaskBoxesArray();
+        CompartementMaskBoxesArray();
     };
-    lockingNotch();
-    
+    zmove(-(z/2)) zmove(boxLipHeight + lockingRidgeSize)
+    LockingRidge(0);
 };
 
-module lockingNotch()
-{
-    for(i=[-1:2:1]) 
-    {
-            xmove(i * (x/2)) 
-            zscale(-0.8)
-        cyl(r=notchRadius, 
-            h=(y * 0.25),
-            fillet=(notchRadius * 0.5),
-            orient=ORIENT_Y,
-            center=true);
-    };
-};
-
-module lid () 
+module Lid ()
 {
     difference() {
         cuboid( // outer shell
-            size = [
-                x + outerWallThickness + lidTolerance, 
-                y + outerWallThickness + lidTolerance, 
-                lidHeight + outerWallThickness + lidTolerance],
-                fillet = boxFillet,
-                edges = EDGES_ALL,
-                center = true);
+                size = [
+                    x + outerWallThickness + lidTolerance, 
+                    y + outerWallThickness + lidTolerance, 
+                    lidHeight + outerWallThickness + lidTolerance],
+                    fillet = boxFillet,
+                    edges = EDGES_ALL,
+                    center = true);
 
-        zmove(-outerWallThickness) 
-        cuboid( // inner mask
-            size = [
-                x + lidTolerance, 
-                y + lidTolerance, 
-                lidHeight + lidTolerance],
-                fillet = boxFillet,
-                edges = EDGES_Z_ALL + EDGES_BOTTOM);
+            zmove(-outerWallThickness) // make room for floor
+            cuboid( // inner mask
+                size = [
+                    x + lidTolerance, 
+                    y + lidTolerance, 
+                    lidHeight + lidTolerance],
+                    fillet = boxFillet,
+                    edges = EDGES_Z_ALL + EDGES_BOTTOM);
+            zmove(-(lidHeight/2)) zmove(boxLipHeight/2) zmove(-lidTolerance)
+            BoxLip(lidTolerance);
 
-        zmove(-((lidHeight/2)+lidTolerance))
-        zmove(z/2)
-        lockingNotch(); // notch indents for box to fit into
-
-        cylRotCopies = fingerHoleType=="all" ? 8 : 4;
-        zmove(-((lidHeight/2)+lidTolerance))
-        zrot_copies(n=cylRotCopies)
-        cyl(d = fingerHoleSize, h = x+y, orient = ORIENT_Y, center = true);
+            zmove(-(lidHeight/2)) zmove(boxLipHeight + lockingRidgeSize)
+            LockingRidge(lidTolerance);
     };
-    
-    if(lidHeight > z) //add reverse entry notch to block over-insertion to large lids and allow for the lid to be used as a tray ala oath orginizers
+}
+
+
+/* old Lid and notch system
+    module lockingNotch()
     {
-        for(i = [0:1:1])
-            zrot(90 * i)
-            zmove(-((lidHeight/2)+lidTolerance))
-            zmove(z)
-            lockingNotch();
+        for(i=[-1:2:1]) 
+        {
+                xmove(i * (x/2)) 
+                zscale(-0.8)
+            cyl(r=notchRadius, 
+                h=(y * 0.25),
+                fillet=(notchRadius * 0.5),
+                orient=ORIENT_Y,
+                center=true);
+        };
     };
-};
+
+    module Lid () 
+    {
+        difference() {
+            cuboid( // outer shell
+                size = [
+                    x + outerWallThickness + lidTolerance, 
+                    y + outerWallThickness + lidTolerance, 
+                    lidHeight + outerWallThickness + lidTolerance],
+                    fillet = boxFillet,
+                    edges = EDGES_ALL,
+                    center = true);
+
+            zmove(-outerWallThickness) 
+            cuboid( // inner mask
+                size = [
+                    x + lidTolerance, 
+                    y + lidTolerance, 
+                    lidHeight + lidTolerance],
+                    fillet = boxFillet,
+                    edges = EDGES_Z_ALL + EDGES_BOTTOM);
+
+            zmove(-((lidHeight/2)+lidTolerance))
+            zmove(z/2)
+            lockingNotch(); // notch indents for box to fit into
+
+            cylRotCopies = fingerHoleType=="all" ? 8 : 4;
+            zmove(-((lidHeight/2)+lidTolerance))
+            zrot_copies(n=cylRotCopies)
+            cyl(d = fingerHoleSize, h = x+y, orient = ORIENT_Y, center = true);
+        };
+        
+        if(lidHeight > z) //add reverse entry notch to block over-insertion to large lids and allow for the Lid to be used as a tray ala oath orginizers
+        {
+            for(i = [0:1:1])
+                zrot(90 * i)
+                zmove(-((lidHeight/2)+lidTolerance))
+                zmove(z)
+                lockingNotch();
+        };
+    };
+*/
 
 if(generatedPart=="box") {
-    zmove(z/2)
-    subdevBox();
+    //zmove(z/2)
+    SubdevBox();
 };
 if(generatedPart=="lid") {
-    zflip()
-    lid();
+    //zflip()
+    Lid();
 };
 if(generatedPart=="test"){
-    subdevBox();
-
-    lid();
-}
+    SubdevBox();
+    LockingRidge(0);
+};
