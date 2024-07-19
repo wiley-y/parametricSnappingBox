@@ -1,0 +1,26 @@
+{
+    "fileFormatVersion": "1",
+    "parameterSets": {
+        "New set 1": {
+            "$fa": "1",
+            "$fs": "0.40000000000000002",
+            "botDevision": "false",
+            "boxFillet": "1",
+            "boxLipHeight": "5",
+            "compartementFillet": "0",
+            "enforceOuterWall": "false",
+            "generatedPart": "box",
+            "innerWallThickness": "0.5",
+            "lidHeight": "30",
+            "lidTolerance": "0.80000000000000004",
+            "lockingRidgeSize": "1",
+            "outerWallThickness": "1",
+            "totalCavities": "10000",
+            "x": "100",
+            "xGrids": "6",
+            "y": "200",
+            "yGrids": "10",
+            "z": "20"
+        }
+    }
+}

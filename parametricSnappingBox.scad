@@ -6,7 +6,7 @@ use <BOSL/transforms.scad>
 $fa = 1;
 $fs = 0.4;
 
-generatedPart = "test"; //box or Lid
+generatedPart = "box"; //box or Lid
 
 x=100;
 y=200;
@@ -14,32 +14,77 @@ z=20;
 
 // Cavity Definition
 
-xGrids = 3;
-yGrids = 3;
+xGrids = 6;
+yGrids = 10;
 
-totalCavities = 16;
+totalCavities = 10000;
 cavityArrayConfig = [
     /* 
     ex. [starting pos, x size, y size, type, fillet, build toggle] */
-    [1, 1, 1, "box", 0, true],
-    [2, 1, 1, "box", 0, true],
-    [3, 1, 1, "box", 0, true],
-    [4, 1, 1, "box", 0, true],
-    [5, 1, 1, "box", 0, true],
-    [6, 1, 1, "box", 0, true],
-    [7, 1, 1, "box", 0, true],
-    [8, 1, 1, "box", 0, true],
-    [9, 1, 1, "box", 0, true],
-    [10, 1, 1, "box", 0, true],
-    [11, 1, 1, "box", 0, true],
-    [12, 1, 1, "box", 0, true],
-    [13, 1, 1, "box", 0, true],
-    [14, 1, 1, "box", 0, true],
-    [15, 1, 1, "box", 0, true],
-    [16, 1, 1, "box", 0, true]
+    [01, 2, 3, "box", 0, 1],
+    [01, 5, 2, "box", 0, 1],
+    [02, 1, 1, "box", 0, 1],
+    [03, 1, 1, "box", 0, 1],
+    [04, 1, 1, "box", 0, 1],
+    [05, 1, 1, "box", 0, 1],
+    [06, 1, 1, "box", 0, 1],
+    [07, 1, 1, "box", 0, 1],
+    [08, 1, 1, "box", 0, 1],
+    [09, 1, 1, "box", 0, 1],
+    [10, 1, 1, "box", 0, 1],
+    [11, 1, 1, "box", 0, 1],
+    [12, 1, 1, "box", 0, 1],
+    [13, 1, 1, "box", 0, 1],
+    [14, 1, 1, "box", 0, 1],
+    [15, 1, 1, "box", 0, 1],
+    [16, 1, 1, "box", 0, 1],
+    [17, 1, 1, "box", 0, 1],
+    [18, 1, 1, "box", 0, 1],
+    [19, 1, 1, "box", 0, 1],
+    [20, 1, 1, "box", 0, 1],
+    [21, 1, 1, "box", 0, 1],
+    [22, 1, 1, "box", 0, 1],
+    [23, 1, 1, "box", 0, 1],
+    [24, 1, 1, "box", 0, 1],
+    [25, 1, 1, "box", 0, 1],
+    [26, 1, 1, "box", 0, 1],
+    [27, 1, 1, "box", 0, 1],
+    [28, 1, 1, "box", 0, 1],
+    [29, 1, 1, "box", 0, 1],
+    [30, 1, 1, "box", 0, 1],
+    [31, 1, 1, "box", 0, 1],
+    [32, 1, 1, "box", 0, 1],
+    [33, 1, 1, "box", 0, 1],
+    [34, 1, 1, "box", 0, 1],
+    [35, 1, 1, "box", 0, 1],
+    [36, 1, 1, "box", 0, 1],
+    [37, 1, 1, "box", 0, 1],
+    [38, 1, 1, "box", 0, 1],
+    [39, 1, 1, "box", 0, 1],
+    [40, 1, 1, "box", 0, 1],
+    [41, 1, 1, "box", 0, 1],
+    [42, 1, 1, "box", 0, 1],
+    [43, 1, 1, "box", 0, 1],
+    [44, 1, 1, "box", 0, 1],
+    [45, 1, 1, "box", 0, 1],
+    [46, 1, 1, "box", 0, 1],
+    [47, 1, 1, "box", 0, 1],
+    [48, 1, 1, "box", 0, 1],
+    [49, 1, 1, "box", 0, 1],
+    [50, 1, 1, "box", 0, 1],
+    [51, 1, 1, "box", 0, 1],
+    [52, 1, 1, "box", 0, 1],
+    [53, 1, 1, "box", 0, 1],
+    [54, 1, 1, "box", 0, 1],
+    [55, 1, 1, "box", 0, 1],
+    [56, 1, 1, "box", 0, 1],
+    [57, 1, 1, "box", 0, 1],
+    [58, 1, 1, "box", 0, 1],
+    [59, 1, 1, "box", 0, 1],
+    [60, 1, 1, "box", 0, 1]
 ];
 
-enforceOuterWall = true:
+enforceOuterWall = false;
 
 boxLipHeight=5; 
 lidHeight = 30;
@@ -58,27 +103,16 @@ boxFillet=1;
 compartementFillet=0;
 
 outerWallThickness=1;
-innerWallThickness=1;
+innerWallThickness=0.5;
 innerWallHeight=z;
 
-topXSubDiv=1;
-topYSubDiv=1;
-
-botXSubDiv=3;
-botYSubDiv=2;
-
-//topMaskX = ((x - ((outerWallThickness * 2)+(innerWallThickness * (topXSubDiv - 1)))) / topXSubDiv); // two outer walls and n-1 inner walls
-//topMaskY = ((topDevisionSize - ((outerWallThickness)+(innerWallThickness * (topYSubDiv)))) / topYSubDiv); // 1.5 outer walls and n-1 inner walls
-
-// botMaskX = botDevision==true ? ((x - ((outerWallThickness * 2)+(innerWallThickness * (botXSubDiv - 1)))) / botXSubDiv) : undef; // two outer walls and n-1 inner walls
-// botMaskY = botDevision==true ? ((botDevisionSize - ((outerWallThickness)+(innerWallThickness * (botYSubDiv)))) / botYSubDiv) : undef; // 1 outer wall and n inner walls 
-
 // init grid
-xGridsMM = (x / xGrids); //get the size of each grid
-yGridsMM = (y / yGrids);
+xGridsMM = (x - (outerWallThickness*4)) / (yGrids);// - ((innerWallThickness * (yGrids - 1))); //get the size of each grid
+yGridsMM = (y - (outerWallThickness*4)) / (xGrids);// - ((innerWallThickness * (xGrids - 1)));
+
 
 // create a vector of vectors describing every point in the grid
-grid = [for (ix=[1:(yGrids)]) for(iy=[1:xGrids]) [(ix * xGridsMM) + (xGridsMM/2), (iy * yGridsMM) + (yGridsMM/2), 0]];
+grid = [for (ix=[1:(yGrids)]) for(iy=[1:xGrids]) [(ix), (iy), 0]];
 echo(grid);
 
 
@@ -98,10 +132,10 @@ module HollowBox() {
 
             zmove(z/2) zmove(outerWallThickness)
         cuboid(
-            size[
-                x = x - (outerWallThickness/2),
-                y = y - (outerWallThickness/2),
-                z = z],
+            size = [
+                (x - (outerWallThickness/2)),
+                (y - (outerWallThickness/2)),
+                z],
             fillet = boxFillet,
             edges = EDGES_Z_ALL + EDGES_BOTTOM,
             center = true);
@@ -117,16 +151,24 @@ module Cavity(
     cavityBuildToggle = true) 
 {
     // calculate size of box accounting for wall thicknesses and cavity size settings
-    xCavitySizeMM = (xCavitySize * xGridsMM) - (outerWallThickness * 2) - (innerWallThickness * (xGrids - 1));
-    yCavitySizeMM = (yCavitySize * yGridsMM) - (outerWallThickness * 2) - (innerWallThickness * (yGrids - 1));
+    xCavitySizeMM = (xCavitySize * xGridsMM) - innerWallThickness;// - ((innerWallThickness * (xGrids - 1)));
+    yCavitySizeMM = (yCavitySize * yGridsMM) - innerWallThickness;// - ((innerWallThickness * (yGrids - 1)));
 
 
-        zmove(outerWallThickness)
-        move(grid[cavityPos])
-        xmove(-(x) + outerWallThickness) ymove((-y) + outerWallThickness)
+        move([ // move to spot in grid
+            grid[cavityPos][0] * xGridsMM + innerWallThickness,
+            grid[cavityPos][1] * yGridsMM + innerWallThickness,
+            0
+        ])
+        move([ // align with box
+            -grid[0][0] * xGridsMM + (outerWallThickness - innerWallThickness),
+            -grid[0][1] * yGridsMM + (outerWallThickness - innerWallThickness),
+            0
+            ])
+        zmove(outerWallThickness) // move up for floor
     if(cavityBuildToggle==1)
     {
-            
+        echo("cavity!");
         if(cavityType=="box") 
         {
             cuboid(
@@ -134,6 +176,7 @@ module Cavity(
                 fillet=cavityBoxFillet,
                 edges=EDGES_Z_ALL+EDGES_BOTTOM,
                 center = false);
+            echo("box!");
         };
         if(cavityType=="cyl")
         {
@@ -155,71 +198,29 @@ module Cavity(
 
 module CavityArray()
 {
-    cavityArrayLoopLen = (xGrids*yGrids)<totalCavities ? (xGrids*yGrids) : totalCavities;
+    echo("array!");
+    // cavityArrayLoopLen = (xGrids*yGrids)<totalCavities ? (xGrids*yGrids) : totalCavities;
 
-    //move(x = -(x/2), y = -(y/2), z = 0) move(x = -xGridsMM, y = -yGridsMM, z = 0)
-    for(i = [0:(cavityArrayLoopLen)-1]) 
+    for(i = [0:(totalCavities)-1]) 
     {
-        Cavity(
-            cavityPos = (cavityArrayConfig[i][0])-1,  
-            xCavitySize = cavityArrayConfig[i][1],
-            yCavitySize = cavityArrayConfig[i][2], 
-            cavityType = cavityArrayConfig[i][3],
-            cavityBoxFillet = cavityArrayConfig[i][4],
-            cavityBuildToggle = cavityArrayConfig[i][5]);
-        echo(
-            cavityArrayConfig[i][0],
-            cavityArrayConfig[i][1],
-            cavityArrayConfig[i][2],
-            cavityArrayConfig[i][3],
-            cavityArrayConfig[i][4]);
-        
-    };
-}
-
-
-
-
-/*
-    module CompartementMaskBoxes (xSubDiv, ySubDiv, xSize, ySize) 
-    {
-        for(i=[0:1:(xSubDiv-1)])
-                xmove(-(x/2)) xmove((xSize / 2) + outerWallThickness) //starting position
-                xmove(xSize * i) xmove(innerWallThickness * i) //loop changes this
-                zmove(z/2) zmove(outerWallThickness) //make room for floor
-            cuboid(
-                size=[xSize, ySize, z], 
-                fillet=compartementFillet,
-                edges=EDGES_Z_ALL+EDGES_BOTTOM,
-                center=true
-            );
-    };
-
-    module CompartementMaskBoxesArray ()
-    {
-        for(i = [0:1:(topYSubDiv - 1)])
-            ymove((topMaskY / 2)) ymove(innerWallThickness / 2) // starting position
-            ymove(topMaskY * i) ymove(innerWallThickness * i) // affected by loop
-            CompartementMaskBoxes(
-                xSubDiv=topXSubDiv,
-                ySubDiv=topYSubDiv,
-                xSize=topMaskX,
-                ySize=topMaskY,
-        );
-        if(botDevision==true)
-        {
-            for(i = [0:1:(botYSubDiv - 1)])
-                ymove(-(botMaskY / 2)) ymove(-(innerWallThickness / 2)) // starting position
-                ymove(-(botMaskY * i)) ymove(-(innerWallThickness * i)) // affected by loop
-                CompartementMaskBoxes(
-                    xSubDiv=botXSubDiv,
-                    ySubDiv=botYSubDiv,
-                    xSize=botMaskX,
-                    ySize=botMaskY,
-            );
+        if(cavityArrayConfig[i][0] < xGrids*yGrids) {
+            Cavity(
+                cavityPos = (cavityArrayConfig[i][0])-1,  
+                xCavitySize = cavityArrayConfig[i][1],
+                yCavitySize = cavityArrayConfig[i][2], 
+                cavityType = cavityArrayConfig[i][3],
+                cavityBoxFillet = cavityArrayConfig[i][4],
+                cavityBuildToggle = cavityArrayConfig[i][5]);
+            echo(
+                cavityArrayConfig[i][0],
+                cavityArrayConfig[i][1],
+                cavityArrayConfig[i][2],
+                cavityArrayConfig[i][3],
+                cavityArrayConfig[i][4],
+                cavityArrayConfig[i][5]);
         };
     };
-*/
+}
 
 module BoxLip (boxLipTolerance) 
 {
@@ -257,25 +258,32 @@ module LockingRidge (lockingRidgeTolerance)
     };
 }
 
+module AdornedBox ()
+{
+    FilledBox();
+
+    if(enforceOuterWall==true) HollowBox();
+    
+    zmove(-(z/2)) zmove(boxLipHeight/2)
+    BoxLip(0);
+
+    zmove(-(z/2)) zmove(boxLipHeight + lockingRidgeSize)
+    LockingRidge(0);
+}
+
 module SubdevBox ()
 {
     difference() {
-        union() {
-            FilledBox();
-            
-            zmove(-(z/2)) zmove(boxLipHeight/2)
-            BoxLip(0);
-        };
-        
+        move([x/2, y/2, 0]) AdornedBox();
 
-        /*
-        ymove((25 - topDevisionSize)) // offset for difference sizes tops and bots
-        zmove(-(z/2)) // re-alaign with center, jank
-        CompartementMaskBoxesArray();
-        */
+        move([
+            outerWallThickness,
+            outerWallThickness,
+            -(z/2)])
+        CavityArray();
     };
-    zmove(-(z/2)) zmove(boxLipHeight + lockingRidgeSize)
-    LockingRidge(0);
+
+    
 };
 
 module Lid ()
@@ -306,74 +314,18 @@ module Lid ()
     };
 }
 
-
-/* old Lid and notch system
-    module lockingNotch()
-    {
-        for(i=[-1:2:1]) 
-        {
-                xmove(i * (x/2)) 
-                zscale(-0.8)
-            cyl(r=notchRadius, 
-                h=(y * 0.25),
-                fillet=(notchRadius * 0.5),
-                orient=ORIENT_Y,
-                center=true);
-        };
-    };
-
-    module Lid () 
-    {
-        difference() {
-            cuboid( // outer shell
-                size = [
-                    x + outerWallThickness + lidTolerance, 
-                    y + outerWallThickness + lidTolerance, 
-                    lidHeight + outerWallThickness + lidTolerance],
-                    fillet = boxFillet,
-                    edges = EDGES_ALL,
-                    center = true);
-
-            zmove(-outerWallThickness) 
-            cuboid( // inner mask
-                size = [
-                    x + lidTolerance, 
-                    y + lidTolerance, 
-                    lidHeight + lidTolerance],
-                    fillet = boxFillet,
-                    edges = EDGES_Z_ALL + EDGES_BOTTOM);
-
-            zmove(-((lidHeight/2)+lidTolerance))
-            zmove(z/2)
-            lockingNotch(); // notch indents for box to fit into
-
-            cylRotCopies = fingerHoleType=="all" ? 8 : 4;
-            zmove(-((lidHeight/2)+lidTolerance))
-            zrot_copies(n=cylRotCopies)
-            cyl(d = fingerHoleSize, h = x+y, orient = ORIENT_Y, center = true);
-        };
-        
-        if(lidHeight > z) //add reverse entry notch to block over-insertion to large lids and allow for the Lid to be used as a tray ala oath orginizers
-        {
-            for(i = [0:1:1])
-                zrot(90 * i)
-                zmove(-((lidHeight/2)+lidTolerance))
-                zmove(z)
-                lockingNotch();
-        };
-    };
-*/
-
 if(generatedPart=="box") {
     //zmove(z/2)
     SubdevBox();
+    move(grid[4]) cyl(r=1, h=100);
+    echo(grid[4][0]);
 };
 if(generatedPart=="lid") {
     //zflip()
     Lid();
 };
 if(generatedPart=="test"){
-    CavityArray();
+    HollowBox();
 
     /* Cavity(
             cavityPos = 1,  
