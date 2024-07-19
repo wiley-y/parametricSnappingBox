@@ -17,7 +17,7 @@ todo :
 $fa = 1;
 $fs = 0.4;
 
-generatedPart = "lid"; //box or Lid
+generatedPart = "none"; //box or Lid
 
 x=100;
 y=200;
@@ -43,6 +43,10 @@ outerWallThickness=1;
 innerWallThickness=1;
 innerWallHeight=z;
 
+xGrids = 3;
+yGrids = 3;
+
+
 topXSubDiv=1;
 topYSubDiv=1;
 
@@ -54,6 +58,21 @@ topMaskY = ((topDevisionSize - ((outerWallThickness)+(innerWallThickness * (topY
 
 botMaskX = botDevision==true ? ((x - ((outerWallThickness * 2)+(innerWallThickness * (botXSubDiv - 1)))) / botXSubDiv) : undef; // two outer walls and n-1 inner walls
 botMaskY = botDevision==true ? ((botDevisionSize - ((outerWallThickness)+(innerWallThickness * (botYSubDiv)))) / botYSubDiv) : undef; // 1 outer wall and n inner walls 
+
+
+xGridsMM = (x / xGrids); //get the size of each grid
+yGridsMM = (y / yGrids);
+
+// create a vector of vectors describing every point in the grid
+grid = [for (ix=[1:(yGrids)]) for(iy=[1:xGrids]) [(ix * xGrids) + (xGrids/2), (iy * xGrids) + (xGrids/2), 0]];
+echo(grid);
+
+for(i = [0:(xGrids * yGrids)-1]) 
+{
+    move(grid[i])
+    zmove(z/2)
+    cyl(r=1, h=z, center=true);
+}
 
 module FilledBox ()
 {
@@ -255,3 +274,4 @@ if(generatedPart=="test"){
     SubdevBox();
     LockingRidge(0);
 };
+if(generatedPart=="none") {}
