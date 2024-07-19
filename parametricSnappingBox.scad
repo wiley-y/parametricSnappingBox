@@ -3,17 +3,6 @@ use <BOSL/joiners.scad>
 use <BOSL/shapes.scad>
 use <BOSL/transforms.scad>
 
-/*
-Test one : Lid needs more boxLipTolerance, notch needs to be a little bigger, reverse insertion notch laos needs to be bigger. box should not be this small. 
-
-todo : 
-    fillet cylender type cavities
-    better locking mechanism (just a little bit, it should not be too tough)
-
-    i want the Lid locking and Lid removal to be better, the Lid overlap should come down onto a lip as big as the Lid, the Lid locking should be a rounded square ridge
-    
-*/
-
 $fa = 1;
 $fs = 0.4;
 
@@ -22,6 +11,14 @@ generatedPart = "none"; //box or Lid
 x=100;
 y=200;
 z=20;
+
+// Cavity Definition
+
+cavityArray = [
+    /* 
+    ex. [starting pos, x size, y size, type, fillet] */
+    [1, 1, 1, "cube", 1]
+];
 
 boxLipHeight=5; 
 lidHeight = 30;
@@ -53,28 +50,22 @@ topYSubDiv=1;
 botXSubDiv=3;
 botYSubDiv=2;
 
-topMaskX = ((x - ((outerWallThickness * 2)+(innerWallThickness * (topXSubDiv - 1)))) / topXSubDiv); // two outer walls and n-1 inner walls
-topMaskY = ((topDevisionSize - ((outerWallThickness)+(innerWallThickness * (topYSubDiv)))) / topYSubDiv); // 1.5 outer walls and n-1 inner walls
+//topMaskX = ((x - ((outerWallThickness * 2)+(innerWallThickness * (topXSubDiv - 1)))) / topXSubDiv); // two outer walls and n-1 inner walls
+//topMaskY = ((topDevisionSize - ((outerWallThickness)+(innerWallThickness * (topYSubDiv)))) / topYSubDiv); // 1.5 outer walls and n-1 inner walls
 
 botMaskX = botDevision==true ? ((x - ((outerWallThickness * 2)+(innerWallThickness * (botXSubDiv - 1)))) / botXSubDiv) : undef; // two outer walls and n-1 inner walls
 botMaskY = botDevision==true ? ((botDevisionSize - ((outerWallThickness)+(innerWallThickness * (botYSubDiv)))) / botYSubDiv) : undef; // 1 outer wall and n inner walls 
 
-
+// init grid
 xGridsMM = (x / xGrids); //get the size of each grid
 yGridsMM = (y / yGrids);
 
 // create a vector of vectors describing every point in the grid
-grid = [for (ix=[1:(yGrids)]) for(iy=[1:xGrids]) [(ix * xGrids) + (xGrids/2), (iy * xGrids) + (xGrids/2), 0]];
+grid = [for (ix=[1:(yGrids)]) for(iy=[1:xGrids]) [(ix * xGridsMM) + (xGridsMM/2), (iy * yGridsMM) + (yGridsMM/2), 0]];
 echo(grid);
 
-for(i = [0:(xGrids * yGrids)-1]) 
-{
-    move(grid[i])
-    zmove(z/2)
-    cyl(r=1, h=z, center=true);
-}
 
-module FilledBox ()
+module FilledBox()
 {
     subdevBoxEdges = EDGES_TOP + EDGES_Z_ALL + EDGES_BOTTOM;
     cuboid(
@@ -83,44 +74,94 @@ module FilledBox ()
         edges=subdevBoxEdges);
 }
 
-module CompartementMaskBoxes (xSubDiv, ySubDiv, xSize, ySize) 
+module Cavity(
+    cavityPos,  
+    xCavitySize = 1,
+    yCavitySize = 1, 
+    cavityType = "cyl",
+    cavityBoxFillet = 0) 
 {
-    for(i=[0:1:(xSubDiv-1)])
-            xmove(-(x/2)) xmove((xSize / 2) + outerWallThickness) //starting position
-            xmove(xSize * i) xmove(innerWallThickness * i) //loop changes this
-            zmove(z/2) zmove(outerWallThickness) //make room for floor
-        cuboid(
-            size=[xSize, ySize, z], 
-            fillet=compartementFillet,
-            edges=EDGES_Z_ALL+EDGES_BOTTOM,
-            center=true
-        );
-};
+    xCavitySizeMM = (xCavitySize * xGridsMM) - (outerWallThickness * 2) - (innerWallThickness * (xGrids - 1));
+    yCavitySizeMM = (yCavitySize * yGridsMM) - (outerWallThickness * 2) - (innerWallThickness * (yGrids - 1));
 
-module CompartementMaskBoxesArray ()
-{
-    for(i = [0:1:(topYSubDiv - 1)])
-        ymove((topMaskY / 2)) ymove(innerWallThickness / 2) // starting position
-        ymove(topMaskY * i) ymove(innerWallThickness * i) // affected by loop
-        CompartementMaskBoxes(
-            xSubDiv=topXSubDiv,
-            ySubDiv=topYSubDiv,
-            xSize=topMaskX,
-            ySize=topMaskY,
-    );
-    if(botDevision==true)
+    if(cavityType=="box") 
     {
-        for(i = [0:1:(botYSubDiv - 1)])
-            ymove(-(botMaskY / 2)) ymove(-(innerWallThickness / 2)) // starting position
-            ymove(-(botMaskY * i)) ymove(-(innerWallThickness * i)) // affected by loop
-            CompartementMaskBoxes(
-                xSubDiv=botXSubDiv,
-                ySubDiv=botYSubDiv,
-                xSize=botMaskX,
-                ySize=botMaskY,
-        );
+    zmove(z/2) zmove(outerWallThickness)
+    move(grid[cavityPos])
+    cuboid(
+        size=[xCavitySizeMM, yCavitySizeMM, z],
+        fillet=cavityBoxFillet,
+        edges=EDGES_Z_ALL+EDGES_BOTTOM,
+        center=true);
+    };
+    if(cavityType=="cyl")
+    {
+        // make the longer of the two sides the length
+        cylCavityLength = xCavitySizeMM>yCavitySizeMM ? xCavitySizeMM : yCavitySizeMM; 
+        // make the other value the width
+        cylCavityWidth = cylCavityLength==xCavitySizeMM ? yCavitySizeMM : xCavitySizeMM;
+        // orient the length along the correct axis
+        cylCavityOrient = xCavitySizeMM>yCavitySizeMM ? ORIENT_X : ORIENT_Y;
+        
+
+        zmove(z/2) zmove(outerWallThickness)
+        move(grid[cavityPos])
+        cyl(
+            l = cylCavityLength,
+            d = cylCavityWidth,
+            orient = cylCavityOrient,
+            fillet = z*0.7);
     };
 };
+
+for(i = [0:(xGrids * yGrids)-1]) 
+{
+    Cavity(
+        cavityPos=i
+    );
+}
+
+
+/*
+    module CompartementMaskBoxes (xSubDiv, ySubDiv, xSize, ySize) 
+    {
+        for(i=[0:1:(xSubDiv-1)])
+                xmove(-(x/2)) xmove((xSize / 2) + outerWallThickness) //starting position
+                xmove(xSize * i) xmove(innerWallThickness * i) //loop changes this
+                zmove(z/2) zmove(outerWallThickness) //make room for floor
+            cuboid(
+                size=[xSize, ySize, z], 
+                fillet=compartementFillet,
+                edges=EDGES_Z_ALL+EDGES_BOTTOM,
+                center=true
+            );
+    };
+
+    module CompartementMaskBoxesArray ()
+    {
+        for(i = [0:1:(topYSubDiv - 1)])
+            ymove((topMaskY / 2)) ymove(innerWallThickness / 2) // starting position
+            ymove(topMaskY * i) ymove(innerWallThickness * i) // affected by loop
+            CompartementMaskBoxes(
+                xSubDiv=topXSubDiv,
+                ySubDiv=topYSubDiv,
+                xSize=topMaskX,
+                ySize=topMaskY,
+        );
+        if(botDevision==true)
+        {
+            for(i = [0:1:(botYSubDiv - 1)])
+                ymove(-(botMaskY / 2)) ymove(-(innerWallThickness / 2)) // starting position
+                ymove(-(botMaskY * i)) ymove(-(innerWallThickness * i)) // affected by loop
+                CompartementMaskBoxes(
+                    xSubDiv=botXSubDiv,
+                    ySubDiv=botYSubDiv,
+                    xSize=botMaskX,
+                    ySize=botMaskY,
+            );
+        };
+    };
+*/
 
 module BoxLip (boxLipTolerance) 
 {
@@ -168,9 +209,12 @@ module SubdevBox ()
             BoxLip(0);
         };
         
+
+        /*
         ymove((25 - topDevisionSize)) // offset for difference sizes tops and bots
         zmove(-(z/2)) // re-alaign with center, jank
         CompartementMaskBoxesArray();
+        */
     };
     zmove(-(z/2)) zmove(boxLipHeight + lockingRidgeSize)
     LockingRidge(0);
