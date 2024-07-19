@@ -1,110 +1,54 @@
-include <BOSL/constants.scad>
-use <BOSL/joiners.scad>
-use <BOSL/shapes.scad>
-use <BOSL/transforms.scad>
 
-$fa = 1;
-$fs = 0.4;
 
-generatedPart = "box"; //box or Lid
+generatedPart = "test"; //box or lid or none
 
 x=100;
 y=200;
 z=20;
 
 // Cavity Definition
-
 xGrids = 6;
 yGrids = 10;
 
-totalCavities = 65;
+// [position, x size, y size, type, fillet] 
+// set the default cavities to be built on every grid space except those blocked by DoNotBuild 
+cavityArrayConfigDefault = ["-", 1, 1, "box", 0]; 
+
+//define which grid spaces to not build default boxes on, this does not affect cavities boxes below
+cavityDoNotBuild = [ 
+    0, 1, 2, 3, 4
+];
+
+// define cavities boxes to be built anywhere on the grid with non-default settings
+// it is recomended to turn off default cavities that interfere with your custom ones
 cavityArrayConfig = [
-    /* 
-    ex. [starting pos, x size, y size, type, fillet, build toggle] */
-    [01, 2, 3, "box", 0, 1],
-    [01, 5, 2, "box", 0, 1],
-    [02, 1, 1, "box", 0, 1],
-    [03, 1, 1, "box", 0, 1],
-    [04, 1, 1, "box", 0, 1],
-    [05, 1, 1, "box", 0, 1],
-    [06, 1, 1, "box", 0, 1],
-    [07, 1, 1, "box", 0, 1],
-    [08, 1, 1, "box", 0, 1],
-    [09, 1, 1, "box", 0, 1],
-    [10, 1, 1, "box", 0, 1],
-    [11, 1, 1, "box", 0, 1],
-    [12, 1, 1, "box", 0, 1],
-    [13, 1, 1, "box", 0, 1],
-    [14, 1, 1, "box", 0, 1],
-    [15, 1, 1, "box", 0, 1],
-    [16, 1, 1, "box", 0, 1],
-    [17, 1, 1, "box", 0, 1],
-    [18, 1, 1, "box", 0, 1],
-    [19, 1, 1, "box", 0, 1],
-    [20, 1, 1, "box", 0, 1],
-    [21, 1, 1, "box", 0, 1],
-    [22, 1, 1, "box", 0, 1],
-    [23, 1, 1, "box", 0, 1],
-    [24, 1, 1, "box", 0, 1],
-    [25, 1, 1, "box", 0, 1],
-    [26, 1, 1, "box", 0, 1],
-    [27, 1, 1, "box", 0, 1],
-    [28, 1, 1, "box", 0, 1],
-    [29, 1, 1, "box", 0, 1],
-    [30, 1, 1, "box", 0, 1],
-    [31, 1, 1, "box", 0, 1],
-    [32, 1, 1, "box", 0, 1],
-    [33, 1, 1, "box", 0, 1],
-    [34, 1, 1, "box", 0, 1],
-    [35, 1, 1, "box", 0, 1],
-    [36, 1, 1, "box", 0, 1],
-    [37, 1, 1, "box", 0, 1],
-    [38, 1, 1, "box", 0, 1],
-    [39, 1, 1, "box", 0, 1],
-    [40, 1, 1, "box", 0, 1],
-    [41, 1, 1, "box", 0, 1],
-    [42, 1, 1, "box", 0, 1],
-    [43, 1, 1, "box", 0, 1],
-    [44, 1, 1, "box", 0, 1],
-    [45, 1, 1, "box", 0, 1],
-    [46, 1, 1, "box", 0, 1],
-    [47, 1, 1, "box", 0, 1],
-    [48, 1, 1, "box", 0, 1],
-    [49, 1, 1, "box", 0, 1],
-    [50, 1, 1, "box", 0, 1],
-    [51, 1, 1, "box", 0, 1],
-    [52, 1, 1, "box", 0, 1],
-    [53, 1, 1, "box", 0, 1],
-    [54, 1, 1, "box", 0, 1],
-    [55, 1, 1, "box", 0, 1],
-    [56, 1, 1, "box", 0, 1],
-    [57, 1, 1, "box", 0, 1],
-    [58, 1, 1, "box", 0, 1],
-    [59, 1, 1, "box", 0, 1],
-    [60, 1, 1, "box", 0, 1]
+    //[01, 2, 3, "box", 0],
 ];
 
 enforceOuterWall = false;
+boxFillet=1;
 
 boxLipHeight=5; 
 lidHeight = 30;
 lidTolerance = 0.8;
 lockingRidgeSize = 1;
-lockingRidgeSpacing = ((z-boxLipHeight)*0.2);
-//notchRadius=0.6;
-//fingerHoleSize = 8;
-//fingerHoleType = "all"; // edges, or all
-
-botDevision = false; 
-topDevisionSize = botDevision==true ? 25 : x;
-botDevisionSize= x - topDevisionSize;
-
-boxFillet=1;
-compartementFillet=0;
 
 outerWallThickness=1;
 innerWallThickness=0.5;
 innerWallHeight=z;
+
+//////////////////////////////////////
+
+include <BOSL/constants.scad>
+use <BOSL/joiners.scad>
+use <BOSL/shapes.scad>
+use <BOSL/transforms.scad>
+use <BOSL/math.scad>
+
+$fa = 1;
+$fs = 0.4;
+
+lockingRidgeSpacing = ((z-boxLipHeight)*0.2);
 
 // init grid
 xGridsMM = (x - (outerWallThickness*4)) / (yGrids);// - ((innerWallThickness * (yGrids - 1))); //get the size of each grid
@@ -166,7 +110,6 @@ module Cavity(
             0
             ])
         zmove(outerWallThickness) // move up for floor
-    if(cavityBuildToggle==1)
     {
         if(cavityType=="box") 
         {
@@ -196,20 +139,40 @@ module Cavity(
 
 module CavityArray()
 {
-    // cavityArrayLoopLen = (xGrids*yGrids)<totalCavities ? (xGrids*yGrids) : totalCavities;
-
-    for(i = [0:(totalCavities)-1]) 
+    for(i = [0:(xGrids * yGrids)-1]) //build defaults
     {
-        if(cavityArrayConfig[i][0] != undef) {
+        //echo("loop ", i);
+        cavityArrayBlocker = in_list(i, cavityDoNotBuild);
+        //echo("block cavity = ", cavityArrayBlocker);
+
+        if(cavityArrayBlocker != true) 
+        { 
+            //echo("building default cavity");
             Cavity(
-                cavityPos = (cavityArrayConfig[i][0])-1,  
-                xCavitySize = cavityArrayConfig[i][1],
-                yCavitySize = cavityArrayConfig[i][2], 
-                cavityType = cavityArrayConfig[i][3],
-                cavityBoxFillet = cavityArrayConfig[i][4],
-                cavityBuildToggle = cavityArrayConfig[i][5]);
+                cavityPos = i,  
+                xCavitySize = cavityArrayConfigDefault[1],
+                yCavitySize = cavityArrayConfigDefault[2], 
+                cavityType = cavityArrayConfigDefault[3],
+                cavityBoxFillet = cavityArrayConfigDefault[4],
+                cavityBuildToggle = cavityArrayConfigDefault[5]);
+        };
+        
+        if(cavityArrayBlocker == true) echo("did not build default cavity ", cavityDoNotBuild[i]);
+
+    for(i = [0:len(cavityArrayConfig)]) {
+        if(cavityArrayConfig[i][0] != undef)
+        {
+            //echo("building custom cavity");
+            Cavity(
+                    cavityPos = cavityArrayConfig[i][0],  
+                    xCavitySize = cavityArrayConfig[i][1],
+                    yCavitySize = cavityArrayConfig[i][2], 
+                    cavityType = cavityArrayConfig[i][3],
+                    cavityBoxFillet = cavityArrayConfig[i][4],
+                    cavityBuildToggle = cavityArrayConfig[i][5]);
         };
     };
+};
 }
 
 module BoxLip (boxLipTolerance) 
@@ -313,7 +276,8 @@ if(generatedPart=="lid") {
     Lid();
 };
 if(generatedPart=="test"){
-    HollowBox();
+    CavityArray();
+
 
     /* Cavity(
             cavityPos = 1,  
