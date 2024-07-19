@@ -17,7 +17,7 @@ z=20;
 xGrids = 6;
 yGrids = 10;
 
-totalCavities = 10000;
+totalCavities = 65;
 cavityArrayConfig = [
     /* 
     ex. [starting pos, x size, y size, type, fillet, build toggle] */
@@ -168,7 +168,6 @@ module Cavity(
         zmove(outerWallThickness) // move up for floor
     if(cavityBuildToggle==1)
     {
-        echo("cavity!");
         if(cavityType=="box") 
         {
             cuboid(
@@ -176,7 +175,6 @@ module Cavity(
                 fillet=cavityBoxFillet,
                 edges=EDGES_Z_ALL+EDGES_BOTTOM,
                 center = false);
-            echo("box!");
         };
         if(cavityType=="cyl")
         {
@@ -198,12 +196,11 @@ module Cavity(
 
 module CavityArray()
 {
-    echo("array!");
     // cavityArrayLoopLen = (xGrids*yGrids)<totalCavities ? (xGrids*yGrids) : totalCavities;
 
     for(i = [0:(totalCavities)-1]) 
     {
-        if(cavityArrayConfig[i][0] < xGrids*yGrids) {
+        if(cavityArrayConfig[i][0] != undef) {
             Cavity(
                 cavityPos = (cavityArrayConfig[i][0])-1,  
                 xCavitySize = cavityArrayConfig[i][1],
@@ -211,13 +208,6 @@ module CavityArray()
                 cavityType = cavityArrayConfig[i][3],
                 cavityBoxFillet = cavityArrayConfig[i][4],
                 cavityBuildToggle = cavityArrayConfig[i][5]);
-            echo(
-                cavityArrayConfig[i][0],
-                cavityArrayConfig[i][1],
-                cavityArrayConfig[i][2],
-                cavityArrayConfig[i][3],
-                cavityArrayConfig[i][4],
-                cavityArrayConfig[i][5]);
         };
     };
 }
@@ -317,8 +307,6 @@ module Lid ()
 if(generatedPart=="box") {
     //zmove(z/2)
     SubdevBox();
-    move(grid[4]) cyl(r=1, h=100);
-    echo(grid[4][0]);
 };
 if(generatedPart=="lid") {
     //zflip()
