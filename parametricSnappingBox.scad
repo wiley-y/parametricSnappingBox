@@ -1,12 +1,12 @@
 
 
-generatedPart = "test"; //box or lid or none
+generatedPart = "box"; //box or lid or none
 
 x=100;
 y=200;
 z=20;
 
-// Cavity Definition
+// Grid Definition, this is the smallest resolution that a cavity can be
 xGrids = 6;
 yGrids = 10;
 
@@ -24,6 +24,8 @@ cavityDoNotBuild = [
 cavityArrayConfig = [
     //[01, 2, 3, "box", 0],
 ];
+
+numberGuides = true;
 
 enforceOuterWall = false;
 boxFillet=1;
@@ -57,7 +59,7 @@ yGridsMM = (y - (outerWallThickness*4)) / (xGrids);// - ((innerWallThickness * (
 
 // create a vector of vectors describing every point in the grid
 grid = [for (ix=[1:(yGrids)]) for(iy=[1:xGrids]) [(ix), (iy), 0]];
-echo(grid);
+// echo(grid);
 
 
 module FilledBox()
@@ -85,6 +87,11 @@ module HollowBox() {
             center = true);
     };
 };
+
+module TextGuides() 
+{
+    
+}
 
 module Cavity(
     cavityPos,  
@@ -133,6 +140,11 @@ module Cavity(
                 d = cylCavityWidth,
                 orient = cylCavityOrient,
                 fillet = z*0.7);
+        };
+        # if(numberGuides==true) {
+            textGuide = str(cavityPos);
+            zmove(z) ymove(yCavitySizeMM/2) text(textGuide, size = 5, font="Liberation Sans");
+            echo(textGuide);
         };
     };
 };
@@ -269,6 +281,7 @@ module Lid ()
 
 if(generatedPart=="box") {
     //zmove(z/2)
+    zrot(-90) // rotate for better readability
     SubdevBox();
 };
 if(generatedPart=="lid") {
