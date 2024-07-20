@@ -38,14 +38,20 @@ yGrids = 1;
 cavityArrayConfigDefault = ["-", 1, 1, "box", boxFillet]; 
 
 //define which grid spaces to not build default boxes on, this does not affect cavities boxes below
+//useful to stop defaults from stepping on your custom boxes defined below
 cavityDoNotBuild = [ 
     
 ];
 
 // define cavities boxes to be built anywhere on the grid with non-default settings
 // it is recomended to turn off default cavities that interfere with your custom ones
+// cavity positions are shown on the file itself if numberGuides are enabled
+// size is in units relative to the grid size. a size of [1, 1] is the size of the default container. 2 is twice as big. 
+// it is possible to make multiple custom cavities in the same position, large complex cavities are possible with box types. experement!
 cavityArrayConfig = [
+    //[position, x size, y size, "type", boxfillet]
     //[01, 2, 3, "box", 0],
+    [],
 ];
 
 /* [Additional Options] */
