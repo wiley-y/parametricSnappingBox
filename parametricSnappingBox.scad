@@ -1,14 +1,28 @@
 
 
-generatedPart = "box"; //box or lid or none
+// Which part of the design to show
+generatedPart = "none"; // [box, lid, none]
 
-x=100;
-y=200;
-z=20;
+/* [Basic Dimentions] */
+x=97;
+y=122;
+z=25;
 
-// Grid Definition, this is the smallest resolution that a cavity can be
-xGrids = 6;
-yGrids = 10;
+boxFillet=0;
+
+boxLipHeight=10; 
+lidHeight = 25;
+lidTolerance = 1.2;
+lockingRidgeSize = 1.2;
+
+outerWallThickness=2;
+innerWallThickness=0.5;
+innerWallHeight=z;
+
+/* Compartment Customization */
+xGrids = 4;
+// Much of this customization cannot be dont in the left bar, you must edit the code directly
+yGrids = 4;
 
 // [position, x size, y size, type, fillet] 
 // set the default cavities to be built on every grid space except those blocked by DoNotBuild 
@@ -16,7 +30,7 @@ cavityArrayConfigDefault = ["-", 1, 1, "box", 0];
 
 //define which grid spaces to not build default boxes on, this does not affect cavities boxes below
 cavityDoNotBuild = [ 
-    0, 1, 2, 3, 4
+    
 ];
 
 // define cavities boxes to be built anywhere on the grid with non-default settings
@@ -25,19 +39,9 @@ cavityArrayConfig = [
     //[01, 2, 3, "box", 0],
 ];
 
+/* [Additional Options] */
 numberGuides = true;
-
 enforceOuterWall = false;
-boxFillet=1;
-
-boxLipHeight=5; 
-lidHeight = 30;
-lidTolerance = 0.8;
-lockingRidgeSize = 1;
-
-outerWallThickness=1;
-innerWallThickness=0.5;
-innerWallHeight=z;
 
 //////////////////////////////////////
 
@@ -53,8 +57,8 @@ $fs = 0.4;
 lockingRidgeSpacing = ((z-boxLipHeight)*0.2);
 
 // init grid
-xGridsMM = (x - (outerWallThickness*4)) / (yGrids);// - ((innerWallThickness * (yGrids - 1))); //get the size of each grid
-yGridsMM = (y - (outerWallThickness*4)) / (xGrids);// - ((innerWallThickness * (xGrids - 1)));
+xGridsMM = (x - (outerWallThickness*2)) / (yGrids);// - ((innerWallThickness * (yGrids - 1))); //get the size of each grid
+yGridsMM = (y - (outerWallThickness*2)) / (xGrids);// - ((innerWallThickness * (xGrids - 1)));
 
 
 // create a vector of vectors describing every point in the grid
@@ -88,11 +92,6 @@ module HollowBox() {
     };
 };
 
-module TextGuides() 
-{
-    
-}
-
 module Cavity(
     cavityPos,  
     xCavitySize = 1,
@@ -112,8 +111,8 @@ module Cavity(
             0
         ])
         move([ // align with box
-            -grid[0][0] * xGridsMM + (outerWallThickness - innerWallThickness),
-            -grid[0][1] * yGridsMM + (outerWallThickness - innerWallThickness),
+            -grid[0][0] * xGridsMM,// + (outerWallThickness/2 - innerWallThickness),
+            -grid[0][1] * yGridsMM,// + (outerWallThickness/2 - innerWallThickness),
             0
             ])
         zmove(outerWallThickness) // move up for floor
@@ -205,9 +204,10 @@ module LockingRidge (lockingRidgeTolerance)
     //x wall edges
     yscale(1)
     difference () {
-        torus( 
-            od = x + lockingRidgeSize + lockingRidgeTolerance,
-            id = x + lockingRidgeTolerance
+        cyl(
+            d = x + lockingRidgeSize + lockingRidgeTolerance,
+            h = lockingRidgeSize,
+            fillet = lockingRidgeSize/2
         );
         yscale(y*2) FilledBox();
     };
@@ -215,9 +215,10 @@ module LockingRidge (lockingRidgeTolerance)
     //y wall edges
     xscale(1)
     difference () {
-        torus( 
-            od = y + lockingRidgeSize + lockingRidgeTolerance,
-            id = y + lockingRidgeTolerance
+        cyl(
+            d = y + lockingRidgeSize + lockingRidgeTolerance,
+            h = lockingRidgeSize,
+            fillet = lockingRidgeSize/2
         );
         xscale(x*2) FilledBox();
     };
@@ -275,17 +276,20 @@ module Lid ()
             BoxLip(lidTolerance);
 
             zmove(-(lidHeight/2)) zmove(boxLipHeight + lockingRidgeSize)
-            LockingRidge(lidTolerance);
+            union() {
+                LockingRidge(0);
+                LockingRidge(lidTolerance);
+            };
     };
 }
 
 if(generatedPart=="box") {
     //zmove(z/2)
-    zrot(-90) // rotate for better readability
+    // zrot(-90) // rotate for better readability
     SubdevBox();
 };
 if(generatedPart=="lid") {
-    //zflip()
+    zflip()
     Lid();
 };
 if(generatedPart=="test"){
