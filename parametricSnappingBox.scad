@@ -1,7 +1,7 @@
 
 
 // Which part of the design to show
-generatedPart = "box"; // [box, lid, none]
+generatedPart = "lid"; // [box, lid, none]
 
 /* [Basic Dimentions] */
 x=97;

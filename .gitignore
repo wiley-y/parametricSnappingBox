@@ -1,0 +1,4 @@
+tests/01testbox parametricSnappingBox.stl
+tests/01testlid parametricSnappingBox.stl
+tests/02testBox parametricSnappingBox.stl
+tests/02testLid parametricSnappingBox.stl
