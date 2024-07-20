@@ -1,33 +1,41 @@
 
 
 // Which part of the design to show
-generatedPart = "test"; // [box, lid, none]
+generatedPart = "box"; // [box, lid, none]
 
 /* [Basic Dimentions] */
 x=97;
 y=122;
 z=25;
+// controls the outer edges of the box, inner cavity edges are controlled in cavity settings
+boxFillet=1; 
+ // the rounding of the cylindrical containers
+cylCavityFillet = 0.25; // [0:0.05:1]
 
-boxFillet=0;
-cylCavityFillet = 0.25;
-
+// how high the lower box/lid landing extends up the box
 boxLipHeight=10; 
+// how tall the lid is, must be as tall or taller than the height of the box "z"
 lidHeight = 25;
+// how much room will be added between the box and the lid for 3d printing
 lidTolerance = 1.2;
+// the size of the protrusions that hold the lid in place
 lockingRidgeSize = 1.2;
 
+// the thickness of the outer wall and floor
 outerWallThickness=2;
+// the thickness of the walls that separate the cavities
 innerWallThickness=0.5;
+// unimplemented
 innerWallHeight=z;
 
 /* Compartment Customization */
-xGrids = 4;
+xGrids = 1;
 // Much of this customization cannot be dont in the left bar, you must edit the code directly
-yGrids = 4;
+yGrids = 1;
 
 // [position, x size, y size, type, fillet] 
 // set the default cavities to be built on every grid space except those blocked by DoNotBuild 
-cavityArrayConfigDefault = ["-", 1, 1, "cyl", 0]; 
+cavityArrayConfigDefault = ["-", 1, 1, "box", boxFillet]; 
 
 //define which grid spaces to not build default boxes on, this does not affect cavities boxes below
 cavityDoNotBuild = [ 
@@ -119,6 +127,7 @@ module Cavity(
     union() {
         if(cavityType=="box") 
         {
+            zmove(-z/2)
             zmove(outerWallThickness) // move up for floor
             cuboid(
                 size=[xCavitySizeMM, yCavitySizeMM, z],
@@ -136,7 +145,7 @@ module Cavity(
             cylCavityOrient = xCavitySizeMM>yCavitySizeMM ? ORIENT_X : ORIENT_Y;
             
             zmove(z/2)
-            zscale((z-(outerWallThickness*2)) / cylCavityWidth)
+            zscale((z*2-(outerWallThickness*2)) / cylCavityWidth)
             cyl(
                 l = cylCavityLength,
                 d = cylCavityWidth,
@@ -246,14 +255,8 @@ module SubdevBox ()
     difference() {
         move([x/2, y/2, 0]) AdornedBox();
 
-        move([
-            0,
-            0,
-            -(z/2)])
         CavityArray();
     };
-
-    
 };
 
 module Lid ()
