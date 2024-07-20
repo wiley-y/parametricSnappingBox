@@ -1,7 +1,7 @@
 
 
 // Which part of the design to show
-generatedPart = "none"; // [box, lid, none]
+generatedPart = "test"; // [box, lid, none]
 
 /* [Basic Dimentions] */
 x=97;
@@ -9,6 +9,7 @@ y=122;
 z=25;
 
 boxFillet=0;
+cylCavityFillet = 0.25;
 
 boxLipHeight=10; 
 lidHeight = 25;
@@ -26,7 +27,7 @@ yGrids = 4;
 
 // [position, x size, y size, type, fillet] 
 // set the default cavities to be built on every grid space except those blocked by DoNotBuild 
-cavityArrayConfigDefault = ["-", 1, 1, "box", 0]; 
+cavityArrayConfigDefault = ["-", 1, 1, "cyl", 0]; 
 
 //define which grid spaces to not build default boxes on, this does not affect cavities boxes below
 cavityDoNotBuild = [ 
@@ -111,14 +112,14 @@ module Cavity(
             0
         ])
         move([ // align with box
-            -grid[0][0] * xGridsMM,// + (outerWallThickness/2 - innerWallThickness),
-            -grid[0][1] * yGridsMM,// + (outerWallThickness/2 - innerWallThickness),
+            -grid[0][0] * xGridsMM + (outerWallThickness),///2 - innerWallThickness),
+            -grid[0][1] * yGridsMM + (outerWallThickness),///2 - innerWallThickness),
             0
             ])
-        zmove(outerWallThickness) // move up for floor
-    {
+    union() {
         if(cavityType=="box") 
         {
+            zmove(outerWallThickness) // move up for floor
             cuboid(
                 size=[xCavitySizeMM, yCavitySizeMM, z],
                 fillet=cavityBoxFillet,
@@ -134,11 +135,14 @@ module Cavity(
             // orient the length along the correct axis
             cylCavityOrient = xCavitySizeMM>yCavitySizeMM ? ORIENT_X : ORIENT_Y;
             
+            zmove(z/2)
+            zscale((z-(outerWallThickness*2)) / cylCavityWidth)
             cyl(
                 l = cylCavityLength,
                 d = cylCavityWidth,
                 orient = cylCavityOrient,
-                fillet = z*0.7);
+                fillet = cylCavityWidth*(cylCavityFillet),
+                align = V_BACK+V_RIGHT);
         };
         # if(numberGuides==true) {
             textGuide = str(cavityPos);
@@ -243,8 +247,8 @@ module SubdevBox ()
         move([x/2, y/2, 0]) AdornedBox();
 
         move([
-            outerWallThickness,
-            outerWallThickness,
+            0,
+            0,
             -(z/2)])
         CavityArray();
     };

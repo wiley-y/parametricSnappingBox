@@ -113,6 +113,25 @@
             "y": "122",
             "yGrids": "4",
             "z": "25"
+        },
+        "New set 7": {
+            "$fa": "1",
+            "$fs": "0.40000000000000002",
+            "boxFillet": "0",
+            "boxLipHeight": "10",
+            "enforceOuterWall": "false",
+            "generatedPart": "test",
+            "innerWallThickness": "0.5",
+            "lidHeight": "25",
+            "lidTolerance": "1.2",
+            "lockingRidgeSize": "1.2",
+            "numberGuides": "true",
+            "outerWallThickness": "2",
+            "x": "97",
+            "xGrids": "1",
+            "y": "122",
+            "yGrids": "1",
+            "z": "25"
         }
     }
 }
