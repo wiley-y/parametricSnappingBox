@@ -13,11 +13,8 @@
             "lidTolerance": "0.80000000000000004",
             "lockingRidgeSize": "1",
             "outerWallThickness": "1",
-            "x": "100",
             "xGrids": "6",
-            "y": "200",
-            "yGrids": "10",
-            "z": "20"
+            "yGrids": "10"
         },
         "New set 2": {
             "$fa": "1",
@@ -32,11 +29,8 @@
             "lockingRidgeSize": "1",
             "numberGuides": "true",
             "outerWallThickness": "1",
-            "x": "97",
             "xGrids": "1",
-            "y": "122",
-            "yGrids": "1",
-            "z": "25"
+            "yGrids": "1"
         },
         "New set 3": {
             "$fa": "1",
@@ -51,11 +45,8 @@
             "lockingRidgeSize": "1.2",
             "numberGuides": "true",
             "outerWallThickness": "1",
-            "x": "97",
             "xGrids": "4",
-            "y": "122",
-            "yGrids": "4",
-            "z": "25"
+            "yGrids": "4"
         },
         "New set 4": {
             "$fa": "1",
@@ -70,11 +61,8 @@
             "lockingRidgeSize": "1.2",
             "numberGuides": "true",
             "outerWallThickness": "2",
-            "x": "97",
             "xGrids": "4",
-            "y": "122",
-            "yGrids": "4",
-            "z": "25"
+            "yGrids": "4"
         },
         "New set 5": {
             "$fa": "1",
@@ -89,11 +77,8 @@
             "lockingRidgeSize": "1.2",
             "numberGuides": "true",
             "outerWallThickness": "2",
-            "x": "97",
             "xGrids": "1",
-            "y": "122",
-            "yGrids": "1",
-            "z": "25"
+            "yGrids": "1"
         },
         "New set 6": {
             "$fa": "1",
@@ -108,11 +93,8 @@
             "lockingRidgeSize": "1.2",
             "numberGuides": "true",
             "outerWallThickness": "2",
-            "x": "97",
             "xGrids": "4",
-            "y": "122",
-            "yGrids": "4",
-            "z": "25"
+            "yGrids": "4"
         },
         "New set 7": {
             "$fa": "1",
@@ -126,11 +108,8 @@
             "lockingRidgeSize": "1.2",
             "numberGuides": "true",
             "outerWallThickness": "2",
-            "x": "97",
             "xGrids": "1",
-            "y": "122",
-            "yGrids": "1",
-            "z": "25"
+            "yGrids": "1"
         },
         "New set 8": {
             "$fa": "1",
@@ -146,11 +125,29 @@
             "lockingRidgeSize": "1.2",
             "numberGuides": "true",
             "outerWallThickness": "2",
-            "x": "97",
             "xGrids": "1",
-            "y": "122",
-            "yGrids": "1",
-            "z": "25"
+            "yGrids": "1"
+        },
+        "New set 9": {
+            "$fa": "1",
+            "$fs": "0.40000000000000002",
+            "boxFillet": "0",
+            "boxLipHeight": "5",
+            "calculateCavity": "[1, 1]",
+            "cylCavityFillet": "0.25",
+            "enforceOuterWall": "false",
+            "generatedPart": "box",
+            "height": "15",
+            "innerWallThickness": "0.5",
+            "length": "50",
+            "lidHeight": "15",
+            "lidTolerance": "0.79999999999999993",
+            "lockingRidgeSize": "1.6000000000000001",
+            "numberGuides": "true",
+            "outerWallThickness": "2",
+            "width": "50",
+            "xGrids": "1",
+            "yGrids": "1"
         }
     }
 }

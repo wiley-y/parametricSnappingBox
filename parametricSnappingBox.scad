@@ -1,24 +1,24 @@
 
 
 // Which part of the design to show
-generatedPart = "none"; // [box, lid, none]
+generatedPart = "lid"; // [box, lid, none]
 
 /* [Basic Dimentions] */
-width = 95;
-length = 120;
-height = 25;
+width = 50; // 95
+length = 50; // 120
+height = 15; // 25
 
 // controls the outer edges of the box, inner cavity edges are controlled in cavity settings
-boxFillet=1; 
+boxFillet=0; 
  // the rounding of the cylindrical containers
 cylCavityFillet = 0.25; // [0:0.05:1]
 
 // how high the lower box/lid landing extends up the box
-boxLipHeight=10; 
+boxLipHeight=5; 
 // how tall the lid is, must be as tall or taller than the height of the box "z"
-lidHeight = 25;
+lidHeight = 15;
 // how much room will be added between the box and the lid for 3d printing
-lidTolerance = 0.4;
+lidTolerance = 0.8;
 // the size of the protrusions that hold the lid in place
 lockingRidgeSize = 1.6;
 
@@ -258,7 +258,7 @@ module AdornedBox ()
     zmove(-(z/2)) zmove(boxLipHeight/2)
     BoxLip(lidTolerance);
 
-    zmove(-(z/2)) zmove(boxLipHeight + lockingRidgeSize)
+    zmove(-(z/2)) zmove(boxLipHeight + (lockingRidgeSize * 2))
     LockingRidge(0);
 }
 
@@ -294,7 +294,7 @@ module Lid ()
             zmove(-(lidHeight/2)) zmove(boxLipHeight/2) zmove(-lidTolerance) zmove(-outerWallThickness)
             BoxLip(lidTolerance);
 
-            zmove(-(lidHeight/2)) zmove(boxLipHeight + lockingRidgeSize)
+            zmove(-(lidHeight/2)) zmove((boxLipHeight * 2) + lockingRidgeSize + lidTolerance)
             union() {
                 LockingRidge(0);
                 LockingRidge(lidTolerance);
@@ -332,7 +332,7 @@ if(generatedPart=="box") {
     SubdevBox();
 };
 if(generatedPart=="lid") {
-    //zflip()
+    zflip()
     Lid();
 };
 if(generatedPart=="test"){
