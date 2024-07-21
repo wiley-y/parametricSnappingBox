@@ -294,7 +294,7 @@ module Lid ()
             zmove(-(lidHeight/2)) zmove(boxLipHeight/2) zmove(-lidTolerance) zmove(-outerWallThickness)
             BoxLip(lidTolerance);
 
-            zmove(-(lidHeight/2)) zmove((boxLipHeight * 2) + lockingRidgeSize + lidTolerance)
+            zmove(-(lidHeight/2)) zmove(boxLipHeight + (lockingRidgeSize*2) - lidTolerance - outerWallThickness)
             union() {
                 LockingRidge(0);
                 LockingRidge(lidTolerance);
@@ -332,7 +332,7 @@ if(generatedPart=="box") {
     SubdevBox();
 };
 if(generatedPart=="lid") {
-    zflip()
+    // zflip()
     Lid();
 };
 if(generatedPart=="test"){
