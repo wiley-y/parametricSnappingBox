@@ -1,12 +1,13 @@
 
 
 // Which part of the design to show
-generatedPart = "lid"; // [box, lid, none]
+generatedPart = "none"; // [box, lid, none]
 
 /* [Basic Dimentions] */
-x=97;
-y=122;
-z=25;
+width = 95;
+length = 120;
+height = 25;
+
 // controls the outer edges of the box, inner cavity edges are controlled in cavity settings
 boxFillet=1; 
  // the rounding of the cylindrical containers
@@ -17,21 +18,21 @@ boxLipHeight=10;
 // how tall the lid is, must be as tall or taller than the height of the box "z"
 lidHeight = 25;
 // how much room will be added between the box and the lid for 3d printing
-lidTolerance = 1.2;
+lidTolerance = 0.4;
 // the size of the protrusions that hold the lid in place
-lockingRidgeSize = 1.2;
+lockingRidgeSize = 1.6;
 
 // the thickness of the outer wall and floor
 outerWallThickness=2;
 // the thickness of the walls that separate the cavities
 innerWallThickness=0.5;
-// unimplemented
-innerWallHeight=z;
 
 /* Compartment Customization */
 xGrids = 1;
 // Much of this customization cannot be dont in the left bar, you must edit the code directly
 yGrids = 1;
+// throw example size to echo to calculate the actual size of a cavity
+calculateCavity = [1, 1];
 
 // [position, x size, y size, type, fillet] 
 // set the default cavities to be built on every grid space except those blocked by DoNotBuild 
@@ -51,7 +52,7 @@ cavityDoNotBuild = [
 cavityArrayConfig = [
     //[position, x size, y size, "type", boxfillet]
     //[01, 2, 3, "box", 0],
-    [],
+    //[01, 2, 1, "box", 0],
 ];
 
 /* [Additional Options] */
@@ -68,6 +69,11 @@ use <BOSL/math.scad>
 
 $fa = 1;
 $fs = 0.4;
+
+// process variables to ensure accuracy in outermost dimentions
+x = width - outerWallThickness - lidTolerance;
+y = length - outerWallThickness - lidTolerance;
+z = height - outerWallThickness - lidTolerance;
 
 lockingRidgeSpacing = ((z-boxLipHeight)*0.2);
 
@@ -116,8 +122,8 @@ module Cavity(
     cavityBuildToggle = true) 
 {
     // calculate size of box accounting for wall thicknesses and cavity size settings
-    xCavitySizeMM = (xCavitySize * xGridsMM) - innerWallThickness;// - ((innerWallThickness * (xGrids - 1)));
-    yCavitySizeMM = (yCavitySize * yGridsMM) - innerWallThickness;// - ((innerWallThickness * (yGrids - 1)));
+    xCavitySizeMM = (xCavitySize * xGridsMM) - innerWallThickness*2;
+    yCavitySizeMM = (yCavitySize * yGridsMM) - innerWallThickness*2;
 
 
         move([ // move to spot in grid
@@ -161,8 +167,8 @@ module Cavity(
         };
         # if(numberGuides==true) {
             textGuide = str(cavityPos);
-            zmove(z) ymove(yCavitySizeMM/2) text(textGuide, size = 5, font="Liberation Sans");
-            echo(textGuide);
+            zmove(z) ymove(yCavitySizeMM/2) xmove(xCavitySizeMM/2) 
+            text(textGuide, size = 5, font="Liberation Sans");
         };
     };
 };
@@ -250,7 +256,7 @@ module AdornedBox ()
     if(enforceOuterWall==true) HollowBox();
     
     zmove(-(z/2)) zmove(boxLipHeight/2)
-    BoxLip(0);
+    BoxLip(lidTolerance);
 
     zmove(-(z/2)) zmove(boxLipHeight + lockingRidgeSize)
     LockingRidge(0);
@@ -285,7 +291,7 @@ module Lid ()
                     lidHeight + lidTolerance],
                     fillet = boxFillet,
                     edges = EDGES_Z_ALL + EDGES_BOTTOM);
-            zmove(-(lidHeight/2)) zmove(boxLipHeight/2) zmove(-lidTolerance)
+            zmove(-(lidHeight/2)) zmove(boxLipHeight/2) zmove(-lidTolerance) zmove(-outerWallThickness)
             BoxLip(lidTolerance);
 
             zmove(-(lidHeight/2)) zmove(boxLipHeight + lockingRidgeSize)
@@ -296,13 +302,37 @@ module Lid ()
     };
 }
 
+module EchoInformation() 
+{
+    echo();
+
+    xCavitySizeEcho = (1 * xGridsMM) - innerWallThickness*2;
+    yCavitySizeEcho = (1 * yGridsMM) - innerWallThickness*2;
+
+    echo("----- Interior Cavity Dimentions -----");
+        // default cavity
+        echo("The size of a [1, 1] cavity is ", xCavitySizeEcho, " by ", yCavitySizeEcho, " by ", z-outerWallThickness);
+
+        // custom calculations
+        if(calculateCavity==undef) echo("To calculate a larger box please enter a size into cavlulateCavity");
+        if(calculateCavity!=undef) {
+            echo(
+                "The size of a ", calculateCavity, " cavity is ", 
+                calculateCavity[0] * xCavitySizeEcho, " by ", calculateCavity[1] * yCavitySizeEcho, " by ", z-outerWallThickness);
+        };
+
+    echo();
+}
+
+EchoInformation();
+
 if(generatedPart=="box") {
     //zmove(z/2)
-    // zrot(-90) // rotate for better readability
+    //zrot(-90) // rotate for better readability
     SubdevBox();
 };
 if(generatedPart=="lid") {
-    zflip()
+    //zflip()
     Lid();
 };
 if(generatedPart=="test"){
