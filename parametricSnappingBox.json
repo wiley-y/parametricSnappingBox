@@ -180,6 +180,27 @@
             "width": "50",
             "xGrids": "1",
             "yGrids": "1"
+        },
+        "New set 12": {
+            "$fa": "1",
+            "$fs": "0.40000000000000002",
+            "boxFillet": "1",
+            "boxLipHeight": "7",
+            "calculateCavity": "[1, 1]",
+            "cylCavityFillet": "0.25",
+            "enforceOuterWall": "false",
+            "generatedPart": "lid",
+            "height": "25",
+            "innerWallThickness": "0.5",
+            "length": "125",
+            "lidClearence": "1",
+            "lidTolerance": "0.60000000000000009",
+            "lockingRidgeSize": "0.40000000000000002",
+            "numberGuides": "true",
+            "outerWallThickness": "2",
+            "width": "97",
+            "xGrids": "1",
+            "yGrids": "1"
         }
     }
 }

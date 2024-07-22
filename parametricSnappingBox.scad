@@ -1,36 +1,36 @@
 
 
 // Which part of the design to show
-generatedPart = "lid"; // [box, lid, none]
+generatedPart = "box"; // [box, lid, none]
 
 /* [Basic Dimentions] */
-width = 50; // 95
-length = 50; // 120
-height = 15; // 25
+width = 97; // 95
+length = 122; // 120
+height = 25; // 25
 
 // controls the outer edges of the box, inner cavity edges are controlled in cavity settings
 boxFillet=0; 
  // the rounding of the cylindrical containers
 cylCavityFillet = 0.25; // [0:0.05:1]
 
-// how high the lower box/lid landing extends up the box
-boxLipHeight=5; 
+// the base thickness of the lid and lid lip
+lidThickness=1.5;
 // how much taller the lid is than the box, open space between box and lid interior
-lidClearence = 15;
+lidClearence = 1;
 // how much room will be added between the box and the lid for 3d printing
-lidTolerance = 0.8;
+lidTolerance = 0.6;
 // the size of the protrusions that hold the lid in place
 lockingRidgeSize = 0.5;
+// how high the lower box/lid landing extends up the box
+boxLipHeight=8; 
 
-// the thickness of the outer wall and floor
-outerWallThickness=2;
 // the thickness of the walls that separate the cavities
-innerWallThickness=0.5;
+wallThickness=0.5;
 
 /* Compartment Customization */
-xGrids = 1;
+xGrids = 2;
 // Much of this customization cannot be dont in the left bar, you must edit the code directly
-yGrids = 1;
+yGrids = 2;
 // throw example size to echo to calculate the actual size of a cavity
 calculateCavity = [1, 1];
 
@@ -71,9 +71,9 @@ $fa = 1;
 $fs = 0.4;
 
 // process variables to ensure accuracy in outermost dimentions
-x = width - outerWallThickness - lidTolerance;
-y = length - outerWallThickness - lidTolerance;
-z = height - outerWallThickness - lidTolerance;
+x = width - lidThickness - lidTolerance;
+y = length - lidThickness - lidTolerance;
+z = height - lidThickness - lidTolerance;
 
 lidHeight = z + lidClearence;
 
@@ -81,8 +81,8 @@ lidHeight = z + lidClearence;
 lockingRidgeSpacing = ((z-boxLipHeight)*0.2);
 
 // init grid
-xGridsMM = (x - (outerWallThickness*2)) / (yGrids);// - ((innerWallThickness * (yGrids - 1))); //get the size of each grid
-yGridsMM = (y - (outerWallThickness*2)) / (xGrids);// - ((innerWallThickness * (xGrids - 1)));
+xGridsMM = (x - (wallThickness)) / (yGrids);// - ((wallThickness * (yGrids - 1))); //get the size of each grid
+yGridsMM = (y - (wallThickness)) / (xGrids);// - ((wallThickness * (xGrids - 1)));
 
 
 // create a vector of vectors describing every point in the grid
@@ -104,11 +104,11 @@ module HollowBox() {
     {
         FilledBox();
 
-            zmove(z/2) zmove(outerWallThickness)
+            zmove(z/2) zmove(lidThickness)
         cuboid(
             size = [
-                (x - (outerWallThickness/2)),
-                (y - (outerWallThickness/2)),
+                (x - (lidThickness/2)),
+                (y - (lidThickness/2)),
                 z],
             fillet = boxFillet,
             edges = EDGES_Z_ALL + EDGES_BOTTOM,
@@ -125,25 +125,25 @@ module Cavity(
     cavityBuildToggle = true) 
 {
     // calculate size of box accounting for wall thicknesses and cavity size settings
-    xCavitySizeMM = (xCavitySize * xGridsMM) - innerWallThickness*2;
-    yCavitySizeMM = (yCavitySize * yGridsMM) - innerWallThickness*2;
+    xCavitySizeMM = (xCavitySize * xGridsMM) - wallThickness;
+    yCavitySizeMM = (yCavitySize * yGridsMM) - wallThickness;
 
 
         move([ // move to spot in grid
-            grid[cavityPos][0] * xGridsMM + innerWallThickness,
-            grid[cavityPos][1] * yGridsMM + innerWallThickness,
+            grid[cavityPos][0] * xGridsMM,// + wallThickness,
+            grid[cavityPos][1] * yGridsMM,// + wallThickness,
             0
         ])
         move([ // align with box
-            -grid[0][0] * xGridsMM + (outerWallThickness),///2 - innerWallThickness),
-            -grid[0][1] * yGridsMM + (outerWallThickness),///2 - innerWallThickness),
+            -grid[0][0] * xGridsMM + (wallThickness),///2 - wallThickness),
+            -grid[0][1] * yGridsMM + (wallThickness),///2 - wallThickness),
             0
             ])
     union() {
         if(cavityType=="box") 
         {
             zmove(-z/2)
-            zmove(outerWallThickness) // move up for floor
+            zmove(lidThickness) // move up for floor
             cuboid(
                 size=[xCavitySizeMM, yCavitySizeMM, z],
                 fillet=cavityBoxFillet,
@@ -160,7 +160,7 @@ module Cavity(
             cylCavityOrient = xCavitySizeMM>yCavitySizeMM ? ORIENT_X : ORIENT_Y;
             
             zmove(z/2)
-            zscale((z*2-(outerWallThickness*2)) / cylCavityWidth)
+            zscale((z*2-(lidThickness*2)) / cylCavityWidth)
             cyl(
                 l = cylCavityLength,
                 d = cylCavityWidth,
@@ -218,8 +218,8 @@ module BoxLip (boxLipTolerance)
 {
     cuboid(
         size=[
-            x + outerWallThickness*2 + boxLipTolerance,
-            y + outerWallThickness*2 + boxLipTolerance,
+            x + lidThickness*2 + boxLipTolerance,
+            y + lidThickness*2 + boxLipTolerance,
             boxLipHeight + (boxLipTolerance*2),
         ],
         fillet=boxFillet,
@@ -290,18 +290,18 @@ module SubdevBox ()
 module Lid ()
 {
     difference() {
-            zmove(lidHeight/2) zmove(outerWallThickness/2) //zmove(-lidTolerance/2)
+            zmove(lidHeight/2) zmove(lidThickness/2) //zmove(-lidTolerance/2)
         difference() {
             cuboid( // outer shell
                     size = [
-                        x + outerWallThickness*2 + lidTolerance, 
-                        y + outerWallThickness*2 + lidTolerance, 
-                        lidHeight + outerWallThickness + lidTolerance],
+                        x + lidThickness*2 + lidTolerance, 
+                        y + lidThickness*2 + lidTolerance, 
+                        lidHeight + lidThickness + lidTolerance],
                         fillet = boxFillet,
                         edges = EDGES_ALL,
                         center = true);
 
-            zmove(-outerWallThickness) // make room for floor
+            zmove(-lidThickness) // make room for floor
             cuboid( // inner mask
                 size = [
                     x + lidTolerance*2, 
@@ -317,7 +317,7 @@ module Lid ()
 
             /*
             zmove(-(lidHeight/2)) zmove(boxLipHeight/2) 
-            zmove(-lidTolerance) zmove(-outerWallThickness)
+            zmove(-lidTolerance) zmove(-lidThickness)
             BoxLip(lidTolerance);
 
             zmove(-(lidHeight/2)) zmove(boxLipHeight/2) zmove((z - boxLipHeight) * 0.2)
@@ -331,19 +331,19 @@ module EchoInformation()
 {
     echo();
 
-    xCavitySizeEcho = (1 * xGridsMM) - innerWallThickness*2;
-    yCavitySizeEcho = (1 * yGridsMM) - innerWallThickness*2;
+    xCavitySizeEcho = (1 * xGridsMM) - wallThickness*2;
+    yCavitySizeEcho = (1 * yGridsMM) - wallThickness*2;
 
     echo("----- Interior Cavity Dimentions -----");
         // default cavity
-        echo("The size of a [1, 1] cavity is ", xCavitySizeEcho, " by ", yCavitySizeEcho, " by ", z-outerWallThickness);
+        echo("The size of a [1, 1] cavity is ", xCavitySizeEcho, " by ", yCavitySizeEcho, " by ", z-lidThickness);
 
         // custom calculations
         if(calculateCavity==undef) echo("To calculate a larger box please enter a size into cavlulateCavity");
         if(calculateCavity!=undef) {
             echo(
                 "The size of a ", calculateCavity, " cavity is ", 
-                calculateCavity[0] * xCavitySizeEcho, " by ", calculateCavity[1] * yCavitySizeEcho, " by ", z-outerWallThickness);
+                calculateCavity[0] * xCavitySizeEcho, " by ", calculateCavity[1] * yCavitySizeEcho, " by ", z-lidThickness);
         };
 
     echo();
@@ -357,7 +357,7 @@ if(generatedPart=="box") {
     SubdevBox();
 };
 if(generatedPart=="lid") {
-    //zflip()
+    zflip()
     Lid();
 };
 if(generatedPart=="test"){
