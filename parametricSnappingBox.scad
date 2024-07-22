@@ -1,7 +1,7 @@
 
 
 // Which part of the design to show
-generatedPart = "box"; // [box, lid, none]
+generatedPart = "lid"; // [box, lid, none]
 
 /* [Basic Dimentions] */
 width = 50; // 95
@@ -20,7 +20,7 @@ lidHeight = 15;
 // how much room will be added between the box and the lid for 3d printing
 lidTolerance = 0.8;
 // the size of the protrusions that hold the lid in place
-lockingRidgeSize = 1.6;
+lockingRidgeSize = 0.5;
 
 // the thickness of the outer wall and floor
 outerWallThickness=2;
@@ -306,12 +306,11 @@ module Lid ()
                     edges = EDGES_Z_ALL + EDGES_BOTTOM);
             zmove(-(lidHeight/2)) zmove(boxLipHeight/2) zmove(-lidTolerance) zmove(-outerWallThickness)
             BoxLip(lidTolerance);
-    };
             zmove(-(lidHeight/2)) zmove(boxLipHeight/2) zmove((z - boxLipHeight) * 0.2)
             //zmove(-(z - boxLipHeight) * 0.2)
-            % LockingRidge(lidTolerance);
+            LockingRidge(lidTolerance);
 
-    //};
+    };
 }
 
 module EchoInformation() 
@@ -344,7 +343,7 @@ if(generatedPart=="box") {
     SubdevBox();
 };
 if(generatedPart=="lid") {
-    // zflip()
+    zflip()
     Lid();
 };
 if(generatedPart=="test"){
