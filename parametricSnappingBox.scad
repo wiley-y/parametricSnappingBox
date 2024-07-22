@@ -1,7 +1,7 @@
 
 
 // Which part of the design to show
-generatedPart = "box"; // [box, lid, none]
+generatedPart = "test"; // [box, lid, none]
 
 /* [Basic Dimentions] */
 width = 97; // 95
@@ -52,9 +52,9 @@ cavityDoNotBuild = [
 // it is possible to make multiple custom cavities in the same position, large complex cavities are possible with box types. experement!
 cavityConfig = [
     /*
-    [pos, "type", ["units", x, y], [offset x, offset y] ]
+    [pos, "type", ["units", x, y], [offset x, offset y], [finger tabs?, width] ]
     */
-    [0, "box", ["mm", 50,25]],
+    [0, "box", ["mm", 50,25], [], [true, 10]],
     [1, "box", ["mm", 1,1], [0,-10]]
 ];
 
@@ -107,11 +107,11 @@ module HollowBox() {
     {
         FilledBox();
 
-            zmove(z/2) zmove(lidThickness)
+            zmove(z/2) zmove(wallThickness)
         cuboid(
             size = [
-                (x - (lidThickness/2)),
-                (y - (lidThickness/2)),
+                (x - (wallThickness*2)),
+                (y - (wallThickness*2)),
                 z],
             fillet = boxFillet,
             edges = EDGES_Z_ALL + EDGES_BOTTOM,
@@ -136,6 +136,16 @@ module FloatingNumberGuides(cavityPos)
     text(textGuide, size = 5, font="Liberation Sans");
 }
 
+module CavityFingerTab (fingerTabWidth) 
+{
+    zmove(-z/2) zmove(wallThickness)
+    cyl(
+        d = fingerTabWidth,
+        h = z,
+        fillet1 = fingerTabWidth / 2,
+        align = V_UP
+    );
+}
 
 module Cavity(
     cavityPos,  
@@ -156,10 +166,22 @@ module Cavity(
             ])
     union() {
         if(cavityType=="box") 
-        {
+        {   
+            if(cavityConfig[cavityPos][4][0] != undef) // Finger tabs only on boxes
+                if(cavityConfig[cavityPos][4][0] == true)
+                    for(i = [
+                        [xCavitySize/2, 0, 0],
+                        [0, yCavitySize/2, 0],
+                        [xCavitySize, yCavitySize/2 ,0],
+                        [xCavitySize/2, yCavitySize ,0]
+                    ]) {
+                        move (i)
+                        CavityFingerTab(cavityConfig[cavityPos][4][1]);
+                    };
+
             //echo("box at pos ", cavityPos, " size = ", xCavitySize, yCavitySize);
             zmove(-z/2)
-            zmove(lidThickness) // move up for floor
+            zmove(wallThickness) // move up for floor
             cuboid(
                 size=[xCavitySize, yCavitySize, z],
                 fillet=cavityBoxFillet,
@@ -176,7 +198,7 @@ module Cavity(
             cylCavityOrient = xCavitySize>yCavitySize ? ORIENT_X : ORIENT_Y;
             
             zmove(z/2)
-            zscale((z*2-(lidThickness*2)) / cylCavityWidth)
+            zscale((z*2-(wallThickness*2)) / cylCavityWidth)
             cyl(
                 l = cylCavityLength,
                 d = cylCavityWidth,
@@ -198,7 +220,7 @@ function CalcCavitySize (pos, axis) =
         : //if units == "mm"
         cavityConfig[pos][2][axis];
 
-echo(CalcCavitySize(0, 1));
+//echo(CalcCavitySize(0, 1));
 
 module CavityArray()
 {
@@ -229,8 +251,7 @@ module CavityArray()
     for(i = [0:len(cavityConfig)]) { // build custom cavities
         if(cavityConfig[i][0] != undef)
         {
-
-            customCavityOffset = cavityConfig[i][3] != undef ? concat(cavityConfig[i][3], [0]) : [0,0,0];
+            customCavityOffset = cavityConfig[i][3] != [] ? concat(cavityConfig[i][3], [0]) : [0,0,0];
             move(customCavityOffset)
             Cavity(
                     cavityPos = cavityConfig[i][0],  
@@ -294,27 +315,41 @@ module LockingRidge (lockingRidgeTolerance)
     */
 }
 
-module AdornedBox ()
+module SubdevBox ()
 {
-    FilledBox();
+    difference() {
+        move([x/2, y/2, 0]) 
+        union() {
+            FilledBox();
 
+            difference() {
+                zmove(-(z/2)) zmove(boxLipHeight + (lockingRidgeSize)) zmove((z - boxLipHeight) * 0.2)
+                LockingRidge(0);
+
+                FilledBox();
+            };
+        };
+
+        CavityArray();
+    };
+};
+
+module AdornedBox() 
+{
     if(enforceOuterWall==true) HollowBox();
     
     zmove(-(z/2)) zmove(boxLipHeight/2)
     BoxLip(lidTolerance);
 
-    zmove(-(z/2)) zmove(boxLipHeight + (lockingRidgeSize)) zmove((z - boxLipHeight) * 0.2)
-    LockingRidge(0);
 }
 
-module SubdevBox ()
+module Box ()
 {
-    difference() {
-        move([x/2, y/2, 0]) AdornedBox();
+    SubdevBox();
 
-        CavityArray();
-    };
-};
+    move([x/2, y/2, 0])
+    AdornedBox();
+}
 
 module Lid ()
 {
@@ -341,7 +376,7 @@ module Lid ()
         };
             zmove(z/2)
             scale([((x + lidTolerance*2) / x), ((y + lidTolerance*2) / y), 1]) 
-        AdornedBox();
+        Box();
     };
 
             /*
@@ -383,14 +418,15 @@ EchoInformation();
 if(generatedPart=="box") {
     //zmove(z/2)
     //zrot(-90) // rotate for better readability
-    SubdevBox();
+    Box();
 };
 if(generatedPart=="lid") {
     zflip()
     Lid();
 };
 if(generatedPart=="test"){
-    CavityArray();
+    //CavityArray();
+    SubdevBox();
 
 
     /* Cavity(

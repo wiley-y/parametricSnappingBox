@@ -198,6 +198,29 @@
             "width": "97",
             "xGrids": "2",
             "yGrids": "2"
+        },
+        "New set 14": {
+            "$fa": "1",
+            "$fs": "0.40000000000000002",
+            "boxFillet": "0",
+            "boxLipHeight": "8",
+            "calculateCavity": "[1, 1]",
+            "cavityDoNotBuild": "[0, 1, 2, 3]",
+            "cavityFillet": "0",
+            "cylCavityFillet": "0.25",
+            "enforceOuterWall": "false",
+            "generatedPart": "box",
+            "height": "25",
+            "length": "122",
+            "lidClearence": "1",
+            "lidThickness": "1.5",
+            "lidTolerance": "0.59999999999999998",
+            "lockingRidgeSize": "0.5",
+            "numberGuides": "true",
+            "wallThickness": "0.5",
+            "width": "97",
+            "xGrids": "2",
+            "yGrids": "2"
         }
     }
 }
