@@ -11,6 +11,7 @@ height = 25; // 25
 // controls the outer edges of the box, inner cavity edges are controlled in cavity settings
 boxFillet=0; 
  // the rounding of the cylindrical containers
+cavityFillet = 0;
 cylCavityFillet = 0.25; // [0:0.05:1]
 
 // the base thickness of the lid and lid lip
@@ -36,12 +37,12 @@ calculateCavity = [1, 1];
 
 // [position, x size, y size, type, fillet] 
 // set the default cavities to be built on every grid space except those blocked by DoNotBuild 
-cavityArrayConfigDefault = ["-", 1, 1, "box", boxFillet]; 
+cavityConfigDefault = ["pos", "box", ["grids", 1, 1]]; 
 
 //define which grid spaces to not build default boxes on, this does not affect cavities boxes below
 //useful to stop defaults from stepping on your custom boxes defined below
 cavityDoNotBuild = [ 
-    
+    0,1,2,3
 ];
 
 // define cavities boxes to be built anywhere on the grid with non-default settings
@@ -49,10 +50,12 @@ cavityDoNotBuild = [
 // cavity positions are shown on the file itself if numberGuides are enabled
 // size is in units relative to the grid size. a size of [1, 1] is the size of the default container. 2 is twice as big. 
 // it is possible to make multiple custom cavities in the same position, large complex cavities are possible with box types. experement!
-cavityArrayConfig = [
-    //[position, x size, y size, "type", boxfillet]
-    //[01, 2, 3, "box", 0],
-    //[01, 2, 1, "box", 0],
+cavityConfig = [
+    /*
+    [pos, "type", ["units", x, y], [offset x, offset y] ]
+    */
+    [0, "box", ["mm", 50,25]],
+    [1, "box", ["mm", 1,1], [0,-10]]
 ];
 
 /* [Additional Options] */
@@ -116,19 +119,31 @@ module HollowBox() {
     };
 };
 
+module FloatingNumberGuides(cavityPos) 
+{
+    textGuide = str(cavityPos);
+    move([ // move to spot in grid
+        grid[cavityPos][0] * xGridsMM,// + wallThickness,
+        grid[cavityPos][1] * yGridsMM,// + wallThickness,
+        0
+        ])
+    move([ // align with box
+        -grid[0][0] * xGridsMM + (wallThickness),///2 - wallThickness),
+        -grid[0][1] * yGridsMM + (wallThickness),///2 - wallThickness),
+        0
+        ])
+    zmove(z) ymove(CalcDefaultCavitySize(2)/2) xmove(CalcDefaultCavitySize(1)/2) 
+    text(textGuide, size = 5, font="Liberation Sans");
+}
+
+
 module Cavity(
     cavityPos,  
-    xCavitySize = 1,
-    yCavitySize = 1, 
-    cavityType = "cyl",
-    cavityBoxFillet = 0,
-    cavityBuildToggle = true) 
+    xCavitySize,
+    yCavitySize, 
+    cavityType,
+    cavityBoxFillet) 
 {
-    // calculate size of box accounting for wall thicknesses and cavity size settings
-    xCavitySizeMM = (xCavitySize * xGridsMM) - wallThickness;
-    yCavitySizeMM = (yCavitySize * yGridsMM) - wallThickness;
-
-
         move([ // move to spot in grid
             grid[cavityPos][0] * xGridsMM,// + wallThickness,
             grid[cavityPos][1] * yGridsMM,// + wallThickness,
@@ -142,10 +157,11 @@ module Cavity(
     union() {
         if(cavityType=="box") 
         {
+            //echo("box at pos ", cavityPos, " size = ", xCavitySize, yCavitySize);
             zmove(-z/2)
             zmove(lidThickness) // move up for floor
             cuboid(
-                size=[xCavitySizeMM, yCavitySizeMM, z],
+                size=[xCavitySize, yCavitySize, z],
                 fillet=cavityBoxFillet,
                 edges=EDGES_Z_ALL+EDGES_BOTTOM,
                 center = false);
@@ -153,11 +169,11 @@ module Cavity(
         if(cavityType=="cyl")
         {
             // make the longer of the two sides the length
-            cylCavityLength = xCavitySizeMM>yCavitySizeMM ? xCavitySizeMM : yCavitySizeMM; 
+            cylCavityLength = xCavitySize>yCavitySize ? xCavitySize : yCavitySize; 
             // make the other value the width
-            cylCavityWidth = cylCavityLength==xCavitySizeMM ? yCavitySizeMM : xCavitySizeMM;
+            cylCavityWidth = cylCavityLength==xCavitySize ? yCavitySize : xCavitySize;
             // orient the length along the correct axis
-            cylCavityOrient = xCavitySizeMM>yCavitySizeMM ? ORIENT_X : ORIENT_Y;
+            cylCavityOrient = xCavitySize>yCavitySize ? ORIENT_X : ORIENT_Y;
             
             zmove(z/2)
             zscale((z*2-(lidThickness*2)) / cylCavityWidth)
@@ -168,51 +184,64 @@ module Cavity(
                 fillet = cylCavityWidth*(cylCavityFillet),
                 align = V_BACK+V_RIGHT);
         };
-        # if(numberGuides==true) {
-            textGuide = str(cavityPos);
-            zmove(z) ymove(yCavitySizeMM/2) xmove(xCavitySizeMM/2) 
-            text(textGuide, size = 5, font="Liberation Sans");
-        };
     };
 };
+
+function WhichAxisMM (axis) = axis == 1 ? xGridsMM : yGridsMM;
+
+function CalcDefaultCavitySize (axis) = (cavityConfigDefault[2][axis] * WhichAxisMM(axis)) - wallThickness;
+
+function CalcCavitySize (pos, axis) = 
+    cavityConfig[pos][2][0] == "grids" ? //check the units: 1 = x, 2 = y.
+        //if units == "grids" 
+        cavityConfig[pos][2][axis] * (WhichAxisMM(axis))
+        : //if units == "mm"
+        cavityConfig[pos][2][axis];
+
+echo(CalcCavitySize(0, 1));
 
 module CavityArray()
 {
     for(i = [0:(xGrids * yGrids)-1]) //build defaults
     {
-        //echo("loop ", i);
+        # if(numberGuides==true) {
+            FloatingNumberGuides(i);
+        };
+
+        // echo("loop ", i);
         cavityArrayBlocker = in_list(i, cavityDoNotBuild);
-        //echo("block cavity = ", cavityArrayBlocker);
 
         if(cavityArrayBlocker != true) 
         { 
             //echo("building default cavity");
             Cavity(
                 cavityPos = i,  
-                xCavitySize = cavityArrayConfigDefault[1],
-                yCavitySize = cavityArrayConfigDefault[2], 
-                cavityType = cavityArrayConfigDefault[3],
-                cavityBoxFillet = cavityArrayConfigDefault[4],
-                cavityBuildToggle = cavityArrayConfigDefault[5]);
+                xCavitySize = CalcDefaultCavitySize(1),
+                yCavitySize = CalcDefaultCavitySize(2), 
+                cavityType = cavityConfigDefault[1],
+                cavityBoxFillet = cavityFillet,
+                cavityBuildToggle = cavityConfigDefault[4]);
         };
         
         if(cavityArrayBlocker == true) echo("did not build default cavity ", cavityDoNotBuild[i]);
+    };
 
-    for(i = [0:len(cavityArrayConfig)]) {
-        if(cavityArrayConfig[i][0] != undef)
+    for(i = [0:len(cavityConfig)]) { // build custom cavities
+        if(cavityConfig[i][0] != undef)
         {
-            //echo("building custom cavity");
+
+            customCavityOffset = cavityConfig[i][3] != undef ? concat(cavityConfig[i][3], [0]) : [0,0,0];
+            move(customCavityOffset)
             Cavity(
-                    cavityPos = cavityArrayConfig[i][0],  
-                    xCavitySize = cavityArrayConfig[i][1],
-                    yCavitySize = cavityArrayConfig[i][2], 
-                    cavityType = cavityArrayConfig[i][3],
-                    cavityBoxFillet = cavityArrayConfig[i][4],
-                    cavityBuildToggle = cavityArrayConfig[i][5]);
+                    cavityPos = cavityConfig[i][0],  
+                    xCavitySize = CalcCavitySize(i, 1),
+                    yCavitySize = CalcCavitySize(i, 2), 
+                    cavityType = cavityConfig[i][1],
+                    cavityBoxFillet = cavityFillet);
         };
     };
-};
 }
+
 
 module BoxLip (boxLipTolerance) 
 {
