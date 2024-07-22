@@ -1,7 +1,7 @@
 
 
 // Which part of the design to show
-generatedPart = "lid"; // [box, lid, none]
+generatedPart = "box"; // [box, lid, none]
 
 /* [Basic Dimentions] */
 width = 50; // 95
@@ -226,6 +226,18 @@ module BoxLip (boxLipTolerance)
 
 module LockingRidge (lockingRidgeTolerance)
 {
+    zmove(lockingRidgeSize/2)
+    cuboid(
+        size = [
+            x + (lockingRidgeTolerance * 2) + (lockingRidgeSize * 2),
+            y + (lockingRidgeTolerance * 2) + (lockingRidgeSize * 2), 
+            lockingRidgeSize
+        ],
+        fillet = lockingRidgeSize/2,
+        center = true
+    );
+
+    /*
     //x wall edges
     yscale(1)
     difference () {
@@ -247,6 +259,7 @@ module LockingRidge (lockingRidgeTolerance)
         );
         xscale(x*2) FilledBox();
     };
+    */
 }
 
 module AdornedBox ()
@@ -258,7 +271,7 @@ module AdornedBox ()
     zmove(-(z/2)) zmove(boxLipHeight/2)
     BoxLip(lidTolerance);
 
-    zmove(-(z/2)) zmove(boxLipHeight + (lockingRidgeSize * 2))
+    zmove(-(z/2)) zmove(boxLipHeight + (lockingRidgeSize)) zmove((z - boxLipHeight) * 0.2)
     LockingRidge(0);
 }
 
@@ -293,13 +306,12 @@ module Lid ()
                     edges = EDGES_Z_ALL + EDGES_BOTTOM);
             zmove(-(lidHeight/2)) zmove(boxLipHeight/2) zmove(-lidTolerance) zmove(-outerWallThickness)
             BoxLip(lidTolerance);
-
-            zmove(-(lidHeight/2)) zmove(boxLipHeight + (lockingRidgeSize*2) - lidTolerance - outerWallThickness)
-            union() {
-                LockingRidge(0);
-                LockingRidge(lidTolerance);
-            };
     };
+            zmove(-(lidHeight/2)) zmove(boxLipHeight/2) zmove((z - boxLipHeight) * 0.2)
+            //zmove(-(z - boxLipHeight) * 0.2)
+            % LockingRidge(lidTolerance);
+
+    //};
 }
 
 module EchoInformation() 
