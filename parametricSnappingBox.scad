@@ -1,12 +1,12 @@
 
 
 // Which part of the design to show
-generatedPart = "test"; // [box, lid, none]
+generatedPart = "box"; // [box, lid, none]
 
 /* [Basic Dimentions] */
-width = 97; // 95
-length = 122; // 120
-height = 25; // 25
+width = 140; // 95
+length = 100; // 120
+height = 29; // 25
 
 // controls the outer edges of the box, inner cavity edges are controlled in cavity settings
 boxFillet=0; 
@@ -42,7 +42,7 @@ cavityConfigDefault = ["pos", "box", ["grids", 1, 1]];
 //define which grid spaces to not build default boxes on, this does not affect cavities boxes below
 //useful to stop defaults from stepping on your custom boxes defined below
 cavityDoNotBuild = [ 
-    0,1,2,3
+    0,1
 ];
 
 // define cavities boxes to be built anywhere on the grid with non-default settings
@@ -54,8 +54,10 @@ cavityConfig = [
     /*
     [pos, "type", ["units", x, y], [offset x, offset y], [finger tabs?, width] ]
     */
-    [0, "box", ["mm", 50,25], [], [true, 10]],
-    [1, "box", ["mm", 1,1], [0,-10]]
+  //  [0, "box", ["mm", 50,25], [], [true, 10]],
+  //  [1, "box", ["mm", 1,1], [0,-10]]
+  [0, "box", ["grids", 1, 1], [], [true, 10]],
+  [1, "box", ["grids", 1, 1], [], [true, 10]],
 ];
 
 /* [Additional Options] */
@@ -84,8 +86,8 @@ lidHeight = z + lidClearence;
 lockingRidgeSpacing = ((z-boxLipHeight)*0.2);
 
 // init grid
-xGridsMM = (x - (wallThickness)) / (yGrids);// - ((wallThickness * (yGrids - 1))); //get the size of each grid
-yGridsMM = (y - (wallThickness)) / (xGrids);// - ((wallThickness * (xGrids - 1)));
+xGridsMM = (x - (wallThickness*2)) / (yGrids);// - ((wallThickness * (yGrids - 1))); //get the size of each grid
+yGridsMM = (y - (wallThickness*2)) / (xGrids);// - ((wallThickness * (xGrids - 1)));
 
 
 // create a vector of vectors describing every point in the grid
@@ -216,7 +218,7 @@ function CalcDefaultCavitySize (axis) = (cavityConfigDefault[2][axis] * WhichAxi
 function CalcCavitySize (pos, axis) = 
     cavityConfig[pos][2][0] == "grids" ? //check the units: 1 = x, 2 = y.
         //if units == "grids" 
-        cavityConfig[pos][2][axis] * (WhichAxisMM(axis))
+        cavityConfig[pos][2][axis] * (WhichAxisMM(axis)) - wallThickness
         : //if units == "mm"
         cavityConfig[pos][2][axis];
 
@@ -279,6 +281,7 @@ module BoxLip (boxLipTolerance)
 
 module LockingRidge (lockingRidgeTolerance)
 {
+    zmove(-(z/2)) zmove(boxLipHeight + (lockingRidgeSize)) zmove((z - boxLipHeight) * 0.2)
     zmove(lockingRidgeSize/2)
     cuboid(
         size = [
@@ -323,7 +326,7 @@ module SubdevBox ()
             FilledBox();
 
             difference() {
-                zmove(-(z/2)) zmove(boxLipHeight + (lockingRidgeSize)) zmove((z - boxLipHeight) * 0.2)
+                //zmove(-(z/2)) zmove(boxLipHeight + (lockingRidgeSize)) zmove((z - boxLipHeight) * 0.2)
                 LockingRidge(0);
 
                 FilledBox();
@@ -355,6 +358,7 @@ module Lid ()
 {
     difference() {
             zmove(lidHeight/2) zmove(lidThickness/2) //zmove(-lidTolerance/2)
+        //move([x/2, y/2, 0]) 
         difference() {
             cuboid( // outer shell
                     size = [
@@ -376,7 +380,10 @@ module Lid ()
         };
             zmove(z/2)
             scale([((x + lidTolerance*2) / x), ((y + lidTolerance*2) / y), 1]) 
-        Box();
+        union() {
+            AdornedBox();
+            LockingRidge(0);
+        }
     };
 
             /*
