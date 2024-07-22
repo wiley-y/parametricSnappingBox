@@ -15,8 +15,8 @@ cylCavityFillet = 0.25; // [0:0.05:1]
 
 // how high the lower box/lid landing extends up the box
 boxLipHeight=5; 
-// how tall the lid is, must be as tall or taller than the height of the box "z"
-lidHeight = 15;
+// how much taller the lid is than the box, open space between box and lid interior
+lidClearence = 15;
 // how much room will be added between the box and the lid for 3d printing
 lidTolerance = 0.8;
 // the size of the protrusions that hold the lid in place
@@ -74,6 +74,9 @@ $fs = 0.4;
 x = width - outerWallThickness - lidTolerance;
 y = length - outerWallThickness - lidTolerance;
 z = height - outerWallThickness - lidTolerance;
+
+lidHeight = z + lidClearence;
+
 
 lockingRidgeSpacing = ((z-boxLipHeight)*0.2);
 
@@ -215,8 +218,8 @@ module BoxLip (boxLipTolerance)
 {
     cuboid(
         size=[
-            x + outerWallThickness + boxLipTolerance,
-            y + outerWallThickness + boxLipTolerance,
+            x + outerWallThickness*2 + boxLipTolerance,
+            y + outerWallThickness*2 + boxLipTolerance,
             boxLipHeight + (boxLipTolerance*2),
         ],
         fillet=boxFillet,
@@ -287,30 +290,41 @@ module SubdevBox ()
 module Lid ()
 {
     difference() {
-        cuboid( // outer shell
-                size = [
-                    x + outerWallThickness + lidTolerance, 
-                    y + outerWallThickness + lidTolerance, 
-                    lidHeight + outerWallThickness + lidTolerance],
-                    fillet = boxFillet,
-                    edges = EDGES_ALL,
-                    center = true);
+            zmove(lidHeight/2) zmove(outerWallThickness/2) //zmove(-lidTolerance/2)
+        difference() {
+            cuboid( // outer shell
+                    size = [
+                        x + outerWallThickness*2 + lidTolerance, 
+                        y + outerWallThickness*2 + lidTolerance, 
+                        lidHeight + outerWallThickness + lidTolerance],
+                        fillet = boxFillet,
+                        edges = EDGES_ALL,
+                        center = true);
 
             zmove(-outerWallThickness) // make room for floor
             cuboid( // inner mask
                 size = [
-                    x + lidTolerance, 
-                    y + lidTolerance, 
-                    lidHeight + lidTolerance],
+                    x + lidTolerance*2, 
+                    y + lidTolerance*2, 
+                    lidHeight + lidTolerance*2],
                     fillet = boxFillet,
                     edges = EDGES_Z_ALL + EDGES_BOTTOM);
-            zmove(-(lidHeight/2)) zmove(boxLipHeight/2) zmove(-lidTolerance) zmove(-outerWallThickness)
+        };
+            zmove(z/2)
+            scale([((x + lidTolerance*2) / x), ((y + lidTolerance*2) / y), 1]) 
+        AdornedBox();
+    };
+
+            /*
+            zmove(-(lidHeight/2)) zmove(boxLipHeight/2) 
+            zmove(-lidTolerance) zmove(-outerWallThickness)
             BoxLip(lidTolerance);
+
             zmove(-(lidHeight/2)) zmove(boxLipHeight/2) zmove((z - boxLipHeight) * 0.2)
             //zmove(-(z - boxLipHeight) * 0.2)
             LockingRidge(lidTolerance);
-
-    };
+            */
+    //};
 }
 
 module EchoInformation() 
@@ -343,7 +357,7 @@ if(generatedPart=="box") {
     SubdevBox();
 };
 if(generatedPart=="lid") {
-    zflip()
+    //zflip()
     Lid();
 };
 if(generatedPart=="test"){
