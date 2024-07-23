@@ -7,7 +7,8 @@ generatedPart = "test"; // [Gridded_Token_Box, Deck_Box, Lid, none]
 /* [Global Parameters] */
 Lid_Thickness = 1.5;
 Wall_Thickness = 1;
-Outer_Edge_Rounding = 0; //[0:0.05:1]
+Lid_Height = 1;
+Outer_Edge_Rounding = 0; //[0:0.005:0.15]
 
 /* [Token Box Parameters] */
 Grid_Size_X = 140; // 95
@@ -18,58 +19,59 @@ Horizontal_Grid_Devisions = 2;
 Vertical_Grid_Devisions = 2;
 
 Default_Grid_Type = "Box"; //[Box, Scoop]
-Default_Grid_Rounding = 0.5; //[0:0.05:1]
+Scoop_Edge_Rounding = 0.25; // [0:0.05:1]
+Box_Edge_Rounding = 0; //[0:0.005:0.15]
 
 /* [First Custom Grid Settings] */
-First_Custom_Grid_Toggle = true;
+First_Custom_Grid_Toggle = false;
 First_Custom_Grid_Position = 0;
 First_Custom_Grid_Size = [2, 2];
 First_Custom_Grid_Type = "Box"; //[Box, Scoop]
 
 /* [Second Custom Grid Settings] */
-Second_Custom_Grid_Toggle = true;
+Second_Custom_Grid_Toggle = false;
 Second_Custom_Grid_Position = 1;
 Second_Custom_Grid_Size = [1, 1];
 Second_Custom_Grid_Type = "Box"; //[Box, Scoop]
 
 /* [Third Custom Grid Settings] */
-Third_Custom_Grid_Toggle = true;
+Third_Custom_Grid_Toggle = false;
 Third_Custom_Grid_Position = 1;
 Third_Custom_Grid_Size = [1, 1];
 Third_Custom_Grid_Type = "Box"; //[Box, Scoop]
 
 /* [Fourth Custom Grid Settings] */
-Fourth_Custom_Grid_Toggle = true;
+Fourth_Custom_Grid_Toggle = false;
 Fourth_Custom_Grid_Position = 1;
 Fourth_Custom_Grid_Size = [1, 1];
 Fourth_Custom_Grid_Type = "Box"; //[Box, Scoop]
 
 /* [Fifth Custom Grid Settings] */
-Fifth_Custom_Grid_Toggle = true;
+Fifth_Custom_Grid_Toggle = false;
 Fifth_Custom_Grid_Position = 1;
 Fifth_Custom_Grid_Size = [1, 1];
 Fifth_Custom_Grid_Type = "Box"; //[Box, Scoop]
 
 /* [Sixth Custom Grid Settings] */
-Sixth_Custom_Grid_Toggle = true;
+Sixth_Custom_Grid_Toggle = false;
 Sixth_Custom_Grid_Position = 1;
 Sixth_Custom_Grid_Size = [1, 1];
 Sixth_Custom_Grid_Type = "Box"; //[Box, Scoop]
 
 /* [Seventh Custom Grid Settings] */
-Seventh_Custom_Grid_Toggle = true;
+Seventh_Custom_Grid_Toggle = false;
 Seventh_Custom_Grid_Position = 1;
 Seventh_Custom_Grid_Size = [1, 1];
 Seventh_Custom_Grid_Type = "Box"; //[Box, Scoop]
 
 /* [Eighth Custom Grid Settings] */
-Eighth_Custom_Grid_Toggle = true;
+Eighth_Custom_Grid_Toggle = false;
 Eighth_Custom_Grid_Position = 1;
 Eighth_Custom_Grid_Size = [1, 1];
 Eighth_Custom_Grid_Type = "Box"; //[Box, Scoop]
 
 /* [Ninth Custom Grid Settings] */
-Ninth_Custom_Grid_Toggle = true;
+Ninth_Custom_Grid_Toggle = false;
 Ninth_Custom_Grid_Position = 1;
 Ninth_Custom_Grid_Size = [1, 1];
 Ninth_Custom_Grid_Type = "Box"; //[Box, Scoop]
@@ -78,7 +80,6 @@ Ninth_Custom_Grid_Type = "Box"; //[Box, Scoop]
 boxFillet=0; 
  // the rounding of the cylindrical containers
 cavityFillet = 0;
-cylCavityFillet = 0.25; // [0:0.05:1]
 
 // how much taller the lid is than the box, open space between box and lid interior
 lidClearence = 1;
@@ -199,7 +200,7 @@ module FilledBox()
     subdevBoxEdges = EDGES_TOP + EDGES_Z_ALL + EDGES_BOTTOM;
     cuboid(
         size=[x,y,z],
-        fillet=boxFillet,
+        fillet=Outer_Edge_Rounding * z,
         edges=subdevBoxEdges);
 }
 
@@ -214,7 +215,7 @@ module HollowBox() {
                 (x - (Wall_Thickness*2)),
                 (y - (Wall_Thickness*2)),
                 z],
-            fillet = boxFillet,
+            fillet = Box_Edge_Rounding * z,
             edges = EDGES_Z_ALL + EDGES_BOTTOM,
             center = true);
     };
@@ -291,7 +292,7 @@ module TokenBoxCavity(
                 l = cylCavityLength,
                 d = cylCavityWidth,
                 orient = cylCavityOrient,
-                fillet = cylCavityWidth*(cylCavityFillet),
+                fillet = cylCavityWidth*(Scoop_Edge_Rounding),
                 align = V_BACK+V_RIGHT);
         };
     };
@@ -316,7 +317,7 @@ module TokenBoxCavityArray()
                     xCavitySize = 1,
                     yCavitySize = 1, 
                     cavityType = Default_Grid_Type,
-                    cavityBoxFillet = Default_Grid_Rounding);
+                    cavityBoxFillet = Box_Edge_Rounding * z);
             };
     };
 
@@ -328,11 +329,10 @@ module TokenBoxCavityArray()
                     xCavitySize = customCavityArray[i][2][0],
                     yCavitySize = customCavityArray[i][2][1], 
                     cavityType = customCavityArray[i][3],
-                    cavityBoxFillet = Default_Grid_Rounding);
+                    cavityBoxFillet = Box_Edge_Rounding * z);
         };
     };
 }
-
 
 module BoxLip (boxLipTolerance) 
 {
@@ -342,7 +342,7 @@ module BoxLip (boxLipTolerance)
             y + Lid_Thickness*2 + boxLipTolerance,
             boxLipHeight + (boxLipTolerance*2),
         ],
-        fillet=boxFillet,
+        fillet=Outer_Edge_Rounding * z,
         edges=EDGES_ALL
     );
 };
@@ -425,15 +425,15 @@ module Box ()
 module Lid ()
 {
     difference() {
-            zmove(lidHeight/2) zmove(Lid_Thickness/2) //zmove(-lidTolerance/2)
+            zmove(z/2) zmove(Lid_Height/2) zmove(Lid_Thickness/2) //zmove(-lidTolerance/2)
         //move([x/2, y/2, 0]) 
         difference() {
             cuboid( // outer shell
                     size = [
                         x + Lid_Thickness*2 + lidTolerance, 
                         y + Lid_Thickness*2 + lidTolerance, 
-                        lidHeight + Lid_Thickness + lidTolerance],
-                        fillet = boxFillet,
+                        z + Lid_Height + Lid_Thickness + lidTolerance],
+                        fillet = Outer_Edge_Rounding * (Lid_Height + Lid_Thickness + lidTolerance),
                         edges = EDGES_ALL,
                         center = true);
 
@@ -442,8 +442,8 @@ module Lid ()
                 size = [
                     x + lidTolerance*2, 
                     y + lidTolerance*2, 
-                    lidHeight + lidTolerance*2],
-                    fillet = boxFillet,
+                    z + Lid_Height + lidTolerance*2],
+                    fillet = Box_Edge_Rounding * (Lid_Height + lidTolerance*2),
                     edges = EDGES_Z_ALL + EDGES_BOTTOM);
         };
             zmove(z/2)
@@ -455,11 +455,11 @@ module Lid ()
     };
 
             /*
-            zmove(-(lidHeight/2)) zmove(boxLipHeight/2) 
+            zmove(-(Lid_Height/2)) zmove(boxLipHeight/2) 
             zmove(-lidTolerance) zmove(-Lid_Thickness)
             BoxLip(lidTolerance);
 
-            zmove(-(lidHeight/2)) zmove(boxLipHeight/2) zmove((z - boxLipHeight) * 0.2)
+            zmove(-(Lid_Height/2)) zmove(boxLipHeight/2) zmove((z - boxLipHeight) * 0.2)
             //zmove(-(z - boxLipHeight) * 0.2)
             LockingRidge(lidTolerance);
             */
@@ -507,7 +507,7 @@ if(generatedPart=="test"){
                     xCavitySize = customCavityArray[0][1][0],
                     yCavitySize = customCavityArray[0][1][1], 
                     cavityType = customCavityArray[0][3],
-                    cavityBoxFillet = Default_Grid_Rounding);
+                    cavityBoxFillet = Box_Edge_Rounding * z);
 
 
     /* TokenBoxCavity(
