@@ -80,8 +80,6 @@ boxFillet=0;
 cavityFillet = 0;
 cylCavityFillet = 0.25; // [0:0.05:1]
 
-// the base thickness of the lid and lid lip
-lidThickness=1.5;
 // how much taller the lid is than the box, open space between box and lid interior
 lidClearence = 1;
 // how much room will be added between the box and the lid for 3d printing
@@ -91,37 +89,8 @@ lockingRidgeSize = 0.5;
 // how high the lower box/lid landing extends up the box
 boxLipHeight=8; 
 
-// the thickness of the walls that separate the cavities 
-wallThickness=0.5;
-
-
 // throw example size to echo to calculate the actual size of a cavity
 calculateCavity = [1, 1];
-
-// [position, x size, y size, type, fillet] 
-// set the default cavities to be built on every grid space except those blocked by DoNotBuild 
-cavityConfigDefault = ["pos", "box", ["grids", 1, 1]]; 
-
-//define which grid spaces to not build default boxes on, this does not affect cavities boxes below
-//useful to stop defaults from stepping on your custom boxes defined below
-cavityDoNotBuild = [ 
-    0,1
-];
-
-// define cavities boxes to be built anywhere on the grid with non-default settings
-// it is recomended to turn off default cavities that interfere with your custom ones
-// cavity positions are shown on the file itself if numberGuides are enabled
-// size is in units relative to the grid size. a size of [1, 1] is the size of the default container. 2 is twice as big. 
-// it is possible to make multiple custom cavities in the same position, large complex cavities are possible with box types. experement!
-cavityConfig = [
-    /*
-    [pos, "type", ["units", x, y], [offset x, offset y], [finger tabs?, Grid_Size_X] ]
-    */
-  //  [0, "box", ["mm", 50,25], [], [true, 10]],
-  //  [1, "box", ["mm", 1,1], [0,-10]]
-  [0, "box", ["grids", 1, 1], [], [true, 10]],
-  [1, "box", ["grids", 1, 1], [], [true, 10]],
-];
 
 /* [Additional Options] */
 numberGuides = true;
@@ -137,6 +106,21 @@ use <BOSL/math.scad>
 
 $fa = 1;
 $fs = 0.4;
+
+module GridSizeWarning (nGridSize, Grid_Size)
+{
+    if(Grid_Size[0] > Horisontal_Grid_Devisions || Grid_Size[1] > Vertical_Grid_Devisions) 
+        echo("Warning : ", nGridSize, "Grid size cannot exceed Grid Devisions");
+}
+GridSizeWarning("First", First_Custom_Grid_Size);
+GridSizeWarning("Second", Second_Custom_Grid_Size);
+GridSizeWarning("Third", Third_Custom_Grid_Size);
+GridSizeWarning("Fourth", Fourth_Custom_Grid_Size);
+GridSizeWarning("Fifth", Fifth_Custom_Grid_Size);
+GridSizeWarning("Sixth", Sixth_Custom_Grid_Size);
+GridSizeWarning("Seventh", Seventh_Custom_Grid_Size);
+GridSizeWarning("Eighth", Eighth_Custom_Grid_Size);
+GridSizeWarning("Ninth", Ninth_Custom_Grid_Size);
 
 //process size variables to create the size of the outer box
 Grid_Size_Vector = concat([Grid_Size_X], [Grid_Size_Y], [Grid_Size_Z]);
@@ -170,14 +154,6 @@ customCavityArray = concat(
 );
 
 
-/* // make an array of default boxes to not build
-allCustomCavityPos = [
-    for (i = [0 : len(customCavityArray) - 1])
-        customCavityArray[i][0] == true ? // only add to the array if that custom cavity is enabled
-        customCavityArray[i][1] : undef // if false, set undef
-    ];
-echo("allCustomCavityPos", allCustomCavityPos); */
-
 
 customCavityVerticalSpan = [
     for(i = [0 : len(customCavityArray) - 1])
@@ -186,28 +162,17 @@ customCavityVerticalSpan = [
             customCavityArray[i][1] + (1 * i2) : undef // if false, set undef
         ]
 ];
-echo("customCavityVerticalSpan", customCavityVerticalSpan);
+//echo("customCavityVerticalSpan", customCavityVerticalSpan);
 
-customCavityHorisontalSpan = [
+customCavityDoNotBuild = [
     for(i = [0 : len(customCavityArray) - 1])
         [for(i2 = [0 : customCavityArray[i][2][0] - 1])
             for(i3 = [0 : customCavityArray[i][2][1] - 1])
                 customCavityVerticalSpan[i][i3] + (3 * (i2))
         ]
     ];
-echo("customCavityHorisontalSpan", customCavityHorisontalSpan);
+//echo("customCavityDoNotBuild", customCavityDoNotBuild);
 
-
-/* echo(
-    [ for(i = [0 : len(customCavityArray) - 1]) { // for loop to create a vector
-        for(i2 = [
-            customCavityArray[i][1] - 1 : customCavityArray[i][2][1] - 1
-            ])
-            customCavityArray[i][0] == true ? // only add to the array if that custom cavity is enabled
-            i2 //customCavityArray[i][1] + (1 * i2)
-            : undef // if custom cavity is not enabled set to undef
-    } ]
-); */
 
 echo(customCavityArray[0][2][1] - 1);
 
@@ -232,11 +197,11 @@ module HollowBox() {
     {
         FilledBox();
 
-            zmove(z/2) zmove(wallThickness)
+            zmove(z/2) zmove(Wall_Thickness)
         cuboid(
             size = [
-                (x - (wallThickness*2)),
-                (y - (wallThickness*2)),
+                (x - (Wall_Thickness*2)),
+                (y - (Wall_Thickness*2)),
                 z],
             fillet = boxFillet,
             edges = EDGES_Z_ALL + EDGES_BOTTOM,
@@ -248,13 +213,13 @@ module FloatingNumberGuides(cavityPos)
 {
     textGuide = str(cavityPos);
     move([ // move to spot in grid
-        grid[cavityPos][0] * Grid_Size_X,// + wallThickness,
-        grid[cavityPos][1] * Grid_Size_Y,// + wallThickness,
+        grid[cavityPos][0] * Grid_Size_X,// + Wall_Thickness,
+        grid[cavityPos][1] * Grid_Size_Y,// + Wall_Thickness,
         0
         ])
     move([ // align with box
-        -grid[0][0] * Grid_Size_X + (wallThickness),///2 - wallThickness),
-        -grid[0][1] * Grid_Size_Y + (wallThickness),///2 - wallThickness),
+        -grid[0][0] * Grid_Size_X + (Wall_Thickness),///2 - Wall_Thickness),
+        -grid[0][1] * Grid_Size_Y + (Wall_Thickness),///2 - Wall_Thickness),
         0
         ])
     zmove(z) ymove(CalcDefaultCavitySize(2)/2) xmove(CalcDefaultCavitySize(1)/2) 
@@ -263,7 +228,7 @@ module FloatingNumberGuides(cavityPos)
 
 module CavityFingerTab (fingerTabWidth) 
 {
-    zmove(-z/2) zmove(wallThickness)
+    zmove(-z/2) zmove(Wall_Thickness)
     cyl(
         d = fingerTabWidth,
         h = z,
@@ -280,19 +245,19 @@ module TokenBoxCavity(
     cavityBoxFillet) 
 {
         move([ // move to spot in grid
-            grid[cavityPos][0] * Grid_Size_X,// + wallThickness,
-            grid[cavityPos][1] * Grid_Size_Y,// + wallThickness,
+            grid[cavityPos][0] * Grid_Size_X,// + Wall_Thickness,
+            grid[cavityPos][1] * Grid_Size_Y,// + Wall_Thickness,
             0
         ])
         move([ // align with box
-            -grid[0][0] * Grid_Size_X + (wallThickness),///2 - wallThickness),
-            -grid[0][1] * Grid_Size_Y + (wallThickness),///2 - wallThickness),
+            -grid[0][0] * Grid_Size_X + (Wall_Thickness),///2 - Wall_Thickness),
+            -grid[0][1] * Grid_Size_Y + (Wall_Thickness),///2 - Wall_Thickness),
             0
             ])
     union() {
             //echo("box at pos ", cavityPos, " size = ", xCavitySize, yCavitySize);
             zmove(-z/2)
-            zmove(wallThickness) // move up for floor
+            zmove(Wall_Thickness) // move up for floor
             cuboid(
                 size=[xCavitySize, yCavitySize, z],
                 fillet=cavityBoxFillet,
@@ -309,7 +274,7 @@ module TokenBoxCavity(
             cylCavityOrient = xCavitySize>yCavitySize ? ORIENT_X : ORIENT_Y;
             
             zmove(z/2)
-            zscale((z*2-(wallThickness*2)) / cylCavityWidth)
+            zscale((z*2-(Wall_Thickness*2)) / cylCavityWidth)
             cyl(
                 l = cylCavityLength,
                 d = cylCavityWidth,
@@ -321,12 +286,12 @@ module TokenBoxCavity(
 
 function WhichAxisMM (axis) = axis == 1 ? Grid_Size_X : Grid_Size_Y;
 
-function CalcDefaultCavitySize (axis) = (cavityConfigDefault[2][axis] * WhichAxisMM(axis)) - wallThickness;
+function CalcDefaultCavitySize (axis) = (cavityConfigDefault[2][axis] * WhichAxisMM(axis)) - Wall_Thickness;
 
 function CalcCavitySize (pos, axis) = 
     cavityConfig[pos][2][0] == "grids" ? //check the units: 1 = x, 2 = y.
         //if units == "grids" 
-        cavityConfig[pos][2][axis] * (WhichAxisMM(axis)) - wallThickness
+        cavityConfig[pos][2][axis] * (WhichAxisMM(axis)) - Wall_Thickness
         : //if units == "mm"
         cavityConfig[pos][2][axis];
 
@@ -377,8 +342,8 @@ module BoxLip (boxLipTolerance)
 {
     cuboid(
         size=[
-            x + lidThickness*2 + boxLipTolerance,
-            y + lidThickness*2 + boxLipTolerance,
+            x + Lid_Thickness*2 + boxLipTolerance,
+            y + Lid_Thickness*2 + boxLipTolerance,
             boxLipHeight + (boxLipTolerance*2),
         ],
         fillet=boxFillet,
@@ -464,19 +429,19 @@ module Box ()
 module Lid ()
 {
     difference() {
-            zmove(lidHeight/2) zmove(lidThickness/2) //zmove(-lidTolerance/2)
+            zmove(lidHeight/2) zmove(Lid_Thickness/2) //zmove(-lidTolerance/2)
         //move([x/2, y/2, 0]) 
         difference() {
             cuboid( // outer shell
                     size = [
-                        x + lidThickness*2 + lidTolerance, 
-                        y + lidThickness*2 + lidTolerance, 
-                        lidHeight + lidThickness + lidTolerance],
+                        x + Lid_Thickness*2 + lidTolerance, 
+                        y + Lid_Thickness*2 + lidTolerance, 
+                        lidHeight + Lid_Thickness + lidTolerance],
                         fillet = boxFillet,
                         edges = EDGES_ALL,
                         center = true);
 
-            zmove(-lidThickness) // make room for floor
+            zmove(-Lid_Thickness) // make room for floor
             cuboid( // inner mask
                 size = [
                     x + lidTolerance*2, 
@@ -495,7 +460,7 @@ module Lid ()
 
             /*
             zmove(-(lidHeight/2)) zmove(boxLipHeight/2) 
-            zmove(-lidTolerance) zmove(-lidThickness)
+            zmove(-lidTolerance) zmove(-Lid_Thickness)
             BoxLip(lidTolerance);
 
             zmove(-(lidHeight/2)) zmove(boxLipHeight/2) zmove((z - boxLipHeight) * 0.2)
@@ -509,19 +474,19 @@ module EchoInformation()
 {
     echo();
 
-    xCavitySizeEcho = (1 * Grid_Size_X) - wallThickness*2;
-    yCavitySizeEcho = (1 * Grid_Size_Y) - wallThickness*2;
+    xCavitySizeEcho = (1 * Grid_Size_X) - Wall_Thickness*2;
+    yCavitySizeEcho = (1 * Grid_Size_Y) - Wall_Thickness*2;
 
     echo("----- Interior TokenBoxCavity Dimentions -----");
         // default cavity
-        echo("The size of a [1, 1] cavity is ", xCavitySizeEcho, " by ", yCavitySizeEcho, " by ", z-lidThickness);
+        echo("The size of a [1, 1] cavity is ", xCavitySizeEcho, " by ", yCavitySizeEcho, " by ", z-Lid_Thickness);
 
         // custom calculations
         if(calculateCavity==undef) echo("To calculate a larger box please enter a size into cavlulateCavity");
         if(calculateCavity!=undef) {
             echo(
                 "The size of a ", calculateCavity, " cavity is ", 
-                calculateCavity[0] * xCavitySizeEcho, " by ", calculateCavity[1] * yCavitySizeEcho, " by ", z-lidThickness);
+                calculateCavity[0] * xCavitySizeEcho, " by ", calculateCavity[1] * yCavitySizeEcho, " by ", z-Lid_Thickness);
         };
 
     echo();
