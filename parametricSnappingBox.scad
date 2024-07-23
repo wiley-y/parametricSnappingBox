@@ -25,7 +25,7 @@ lockingRidgeSize = 0.5;
 // how high the lower box/lid landing extends up the box
 boxLipHeight=8; 
 
-// the thickness of the walls that separate the cavities
+// the thickness of the walls that separate the cavities 
 wallThickness=0.5;
 
 /* Compartment Customization */
