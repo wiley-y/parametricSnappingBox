@@ -255,16 +255,15 @@ module TokenBoxCavity(
     cavityType,
     cavityBoxFillet) 
 {
+    xCavitySizeMM = (Grid_Size_X * xCavitySize) + (Wall_Thickness * (xCavitySize - 1));
+    yCavitySizeMM = (Grid_Size_Y * yCavitySize) + (Wall_Thickness * (yCavitySize - 1));
+    echo(xCavitySize);
+
         move([ // move to spot in grid
             (grid[cavityPos][0] * Grid_Size_X) + (Wall_Thickness * (grid[cavityPos][0] + 1)),
             (grid[cavityPos][1] * Grid_Size_Y) + (Wall_Thickness * (grid[cavityPos][1] + 1)),
             0
         ])
-        /* move([ // align with box
-            -grid[0][0] * Grid_Size_X,// + (Wall_Thickness),///2 - Wall_Thickness),
-            -grid[0][1] * Grid_Size_Y,// + (Wall_Thickness),///2 - Wall_Thickness),
-            0
-            ]) */
     union() {
         if(cavityType=="Box")
         {
@@ -272,7 +271,7 @@ module TokenBoxCavity(
             zmove(-z/2)
             zmove(Wall_Thickness) // move up for floor
             cuboid(
-                size=[xCavitySize, yCavitySize, z],
+                size=[xCavitySizeMM, yCavitySizeMM, z],
                 fillet=cavityBoxFillet,
                 edges=EDGES_Z_ALL+EDGES_BOTTOM,
                 center = false);
@@ -280,11 +279,11 @@ module TokenBoxCavity(
         if(cavityType=="Scoop")
         {
             // make the longer of the two sides the Grid_Size_Y
-            cylCavityLength = xCavitySize>yCavitySize ? xCavitySize : yCavitySize; 
+            cylCavityLength = xCavitySizeMM>yCavitySizeMM ? xCavitySizeMM : yCavitySizeMM; 
             // make the other value the Grid_Size_X
-            cylCavityWidth = cylCavityLength==xCavitySize ? yCavitySize : xCavitySize;
+            cylCavityWidth = cylCavityLength==xCavitySizeMM ? yCavitySizeMM : xCavitySizeMM;
             // orient the Grid_Size_Y along the correct axis
-            cylCavityOrient = xCavitySize>yCavitySize ? ORIENT_X : ORIENT_Y;
+            cylCavityOrient = xCavitySizeMM>yCavitySizeMM ? ORIENT_X : ORIENT_Y;
             
             zmove(z/2)
             zscale((z*2-(Wall_Thickness*2)) / cylCavityWidth)
@@ -314,8 +313,8 @@ module TokenBoxCavityArray()
                 //echo("building default cavity");
                 TokenBoxCavity(
                     cavityPos = i,  
-                    xCavitySize = Grid_Size_X,
-                    yCavitySize = Grid_Size_Y, 
+                    xCavitySize = 1,
+                    yCavitySize = 1, 
                     cavityType = Default_Grid_Type,
                     cavityBoxFillet = Default_Grid_Rounding);
             };
@@ -324,12 +323,10 @@ module TokenBoxCavityArray()
     for(i = [0:len(customCavityArray)]) { // build custom cavities
         if(customCavityArray[i][0] == true)
         {
-            //customCavityOffset = cavityConfig[i][3] != [] ? concat(cavityConfig[i][3], [0]) : [0,0,0];
-            //move(customCavityOffset)
             TokenBoxCavity(
                     cavityPos = customCavityArray[i][1],  
-                    xCavitySize = customCavityArray[i][1][0],
-                    yCavitySize = customCavityArray[i][1][1], 
+                    xCavitySize = customCavityArray[i][2][0],
+                    yCavitySize = customCavityArray[i][2][1], 
                     cavityType = customCavityArray[i][3],
                     cavityBoxFillet = Default_Grid_Rounding);
         };
@@ -505,7 +502,12 @@ if(generatedPart=="Lid") {
 if(generatedPart=="test"){
     //TokenBoxCavityArray();
     //SubdevBox();
-    HollowBox();
+    TokenBoxCavity(
+                    cavityPos = customCavityArray[0][1],  
+                    xCavitySize = customCavityArray[0][1][0],
+                    yCavitySize = customCavityArray[0][1][1], 
+                    cavityType = customCavityArray[0][3],
+                    cavityBoxFillet = Default_Grid_Rounding);
 
 
     /* TokenBoxCavity(
