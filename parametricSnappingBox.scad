@@ -129,11 +129,6 @@ use <BOSL/math.scad>
 $fa = 1;
 $fs = 0.4;
 
-// process variables to ensure accuracy in outermost dimentions
-x = Grid_Size_X - lidThickness - lidTolerance;
-y = Grid_Size_Y - lidThickness - lidTolerance;
-z = Grid_Size_Z - lidThickness - lidTolerance;
-
 //process size variables to create the size of the outer box
 Grid_Size_Vector = concat([Grid_Size_X], [Grid_Size_Y], [Grid_Size_Z]);
 
@@ -148,22 +143,28 @@ function OuterSizeFromGridSize (axis) =
     (Grid_Size_Z + Wall_Thickness + Lid_Thickness + lidTolerance)
     :
     undef; // if none pass
-
 x = OuterSizeFromGridSize("x"); // horisontal
 y = OuterSizeFromGridSize("y"); // vertical
 z = OuterSizeFromGridSize("z");
 
+// create an array to make the custom grid settings readable
+
+customCavityArray = concat(
+    [[Second_Custom_Grid_Position],      [Second_Custom_Grid_Size],      [Second_Custom_Grid_Type] ], 
+    [[Third_Custom_Grid_Position],       [Third_Custom_Grid_Size],       [Third_Custom_Grid_Type] ], 
+    [[Fourth_Custom_Grid_Position],      [Fourth_Custom_Grid_Size],      [Fourth_Custom_Grid_Type] ], 
+    [[Fifth_Custom_Grid_Position],       [Fifth_Custom_Grid_Size],       [Fifth_Custom_Grid_Type] ], 
+    [[Sixth_Custom_Grid_Position],       [Sixth_Custom_Grid_Size],       [Sixth_Custom_Grid_Type] ], 
+    [[Seventh_Custom_Grid_Position],     [Seventh_Custom_Grid_Size],     [Seventh_Custom_Grid_Type] ], 
+    [[Eighth_Custom_Grid_Position],      [Eighth_Custom_Grid_Size],      [Eighth_Custom_Grid_Type] ], 
+    [[Ninth_Custom_Grid_Position],       [Ninth_Custom_Grid_Size],       [Ninth_Custom_Grid_Type] ] 
+);
 
 lockingRidgeSpacing = ((z-boxLipHeight)*0.2);
 
-// init grid
-//xGridsMM = (x - (wallThickness*2)) / (Horisontal_Grid_Devisions);// - ((wallThickness * (Horisontal_Grid_Devisions - 1))); //get the size of each grid
-//yGridsMM = (y - (wallThickness*2)) / (Vertical_Grid_Devisions);// - ((wallThickness * (Vertical_Grid_Devisions - 1)));
-
-
-// create a vector of vectors describing every point in the grid
+// create an array describing every point in the grid
 grid = [for (ix=[1:(Horisontal_Grid_Devisions)]) for(iy=[1:Vertical_Grid_Devisions]) [(ix), (iy), 0]];
-// echo(grid);
+//echo(grid);
 
 
 module FilledBox()
@@ -196,13 +197,13 @@ module FloatingNumberGuides(cavityPos)
 {
     textGuide = str(cavityPos);
     move([ // move to spot in grid
-        grid[cavityPos][0] * xGridsMM,// + wallThickness,
-        grid[cavityPos][1] * yGridsMM,// + wallThickness,
+        grid[cavityPos][0] * Grid_Size_X,// + wallThickness,
+        grid[cavityPos][1] * Grid_Size_Y,// + wallThickness,
         0
         ])
     move([ // align with box
-        -grid[0][0] * xGridsMM + (wallThickness),///2 - wallThickness),
-        -grid[0][1] * yGridsMM + (wallThickness),///2 - wallThickness),
+        -grid[0][0] * Grid_Size_X + (wallThickness),///2 - wallThickness),
+        -grid[0][1] * Grid_Size_Y + (wallThickness),///2 - wallThickness),
         0
         ])
     zmove(z) ymove(CalcDefaultCavitySize(2)/2) xmove(CalcDefaultCavitySize(1)/2) 
@@ -228,13 +229,13 @@ module Cavity(
     cavityBoxFillet) 
 {
         move([ // move to spot in grid
-            grid[cavityPos][0] * xGridsMM,// + wallThickness,
-            grid[cavityPos][1] * yGridsMM,// + wallThickness,
+            grid[cavityPos][0] * Grid_Size_X,// + wallThickness,
+            grid[cavityPos][1] * Grid_Size_Y,// + wallThickness,
             0
         ])
         move([ // align with box
-            -grid[0][0] * xGridsMM + (wallThickness),///2 - wallThickness),
-            -grid[0][1] * yGridsMM + (wallThickness),///2 - wallThickness),
+            -grid[0][0] * Grid_Size_X + (wallThickness),///2 - wallThickness),
+            -grid[0][1] * Grid_Size_Y + (wallThickness),///2 - wallThickness),
             0
             ])
     union() {
@@ -282,7 +283,7 @@ module Cavity(
     };
 };
 
-function WhichAxisMM (axis) = axis == 1 ? xGridsMM : yGridsMM;
+function WhichAxisMM (axis) = axis == 1 ? Grid_Size_X : Grid_Size_Y;
 
 function CalcDefaultCavitySize (axis) = (cavityConfigDefault[2][axis] * WhichAxisMM(axis)) - wallThickness;
 
@@ -313,9 +314,8 @@ module CavityArray()
                 cavityPos = i,  
                 xCavitySize = CalcDefaultCavitySize(1),
                 yCavitySize = CalcDefaultCavitySize(2), 
-                cavityType = cavityConfigDefault[1],
-                cavityBoxFillet = cavityFillet,
-                cavityBuildToggle = cavityConfigDefault[4]);
+                cavityType = Default_Grid_Type,
+                cavityBoxFillet = Default_Grid_Rounding);
         };
         
         if(cavityArrayBlocker == true) echo("did not build default cavity ", cavityDoNotBuild[i]);
@@ -331,7 +331,7 @@ module CavityArray()
                     xCavitySize = CalcCavitySize(i, 1),
                     yCavitySize = CalcCavitySize(i, 2), 
                     cavityType = cavityConfig[i][1],
-                    cavityBoxFillet = cavityFillet);
+                    cavityBoxFillet = Default_Grid_Rounding);
         };
     };
 }
@@ -473,8 +473,8 @@ module EchoInformation()
 {
     echo();
 
-    xCavitySizeEcho = (1 * xGridsMM) - wallThickness*2;
-    yCavitySizeEcho = (1 * yGridsMM) - wallThickness*2;
+    xCavitySizeEcho = (1 * Grid_Size_X) - wallThickness*2;
+    yCavitySizeEcho = (1 * Grid_Size_Y) - wallThickness*2;
 
     echo("----- Interior Cavity Dimentions -----");
         // default cavity
