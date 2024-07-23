@@ -1,12 +1,69 @@
 
 
 // Which part of the design to show
-generatedPart = "box"; // [box, lid, none]
+// Parts box, deck box
+generatedPart = "Gridded_Token_Box"; // [Gridded_Token_Box, Deck_Box, Lid, none]
 
-/* [Basic Dimentions] */
-width = 140; // 95
-length = 100; // 120
-height = 29; // 25
+/* [Global Parameters] */
+Lid_Thickness = 1.5;
+Wall_Thickness = 1;
+Outer_Edge_Rounding = 0.5; //[0:0.05:1]
+
+/* [Token Box Parameters] */
+Grid_Size_X = 140; // 95
+Grid_Size_Y = 100; // 120
+Grid_Size_Z = 29; // 25
+
+Vertical_Grid_Devisions = 2;
+Horisontal_Grid_Devisions = 2;
+
+Default_Grid_Type = "Box"; //[Box, Scoop]
+Default_Grid_Rounding = 0.5; //[0:0.05:1]
+
+/* [First Custom Grid Settings] */
+First_Custom_Grid_Position = 1;
+First_Custom_Grid_Size = [1, 1];
+First_Custom_Grid_Type = "Box"; //[Box, Scoop]
+
+/* [Second Custom Grid Settings] */
+Second_Custom_Grid_Position = 1;
+Second_Custom_Grid_Size = [1, 1];
+Second_Custom_Grid_Type = "Box"; //[Box, Scoop]
+
+/* [Third Custom Grid Settings] */
+Third_Custom_Grid_Position = 1;
+Third_Custom_Grid_Size = [1, 1];
+Third_Custom_Grid_Type = "Box"; //[Box, Scoop]
+
+/* [Fourth Custom Grid Settings] */
+Fourth_Custom_Grid_Position = 1;
+Fourth_Custom_Grid_Size = [1, 1];
+Fourth_Custom_Grid_Type = "Box"; //[Box, Scoop]
+
+/* [Fifth Custom Grid Settings] */
+Fifth_Custom_Grid_Position = 1;
+Fifth_Custom_Grid_Size = [1, 1];
+Fifth_Custom_Grid_Type = "Box"; //[Box, Scoop]
+
+/* [Sixth Custom Grid Settings] */
+Sixth_Custom_Grid_Position = 1;
+Sixth_Custom_Grid_Size = [1, 1];
+Sixth_Custom_Grid_Type = "Box"; //[Box, Scoop]
+
+/* [Seventh Custom Grid Settings] */
+Seventh_Custom_Grid_Position = 1;
+Seventh_Custom_Grid_Size = [1, 1];
+Seventh_Custom_Grid_Type = "Box"; //[Box, Scoop]
+
+/* [Eighth Custom Grid Settings] */
+Eighth_Custom_Grid_Position = 1;
+Eighth_Custom_Grid_Size = [1, 1];
+Eighth_Custom_Grid_Type = "Box"; //[Box, Scoop]
+
+/* [Ninth Custom Grid Settings] */
+Ninth_Custom_Grid_Position = 1;
+Ninth_Custom_Grid_Size = [1, 1];
+Ninth_Custom_Grid_Type = "Box"; //[Box, Scoop]
 
 // controls the outer edges of the box, inner cavity edges are controlled in cavity settings
 boxFillet=0; 
@@ -29,9 +86,9 @@ boxLipHeight=8;
 wallThickness=0.5;
 
 /* Compartment Customization */
-xGrids = 2;
+Vertical_Grid_Devisions = 2;
 // Much of this customization cannot be dont in the left bar, you must edit the code directly
-yGrids = 2;
+Horisontal_Grid_Devisions = 2;
 // throw example size to echo to calculate the actual size of a cavity
 calculateCavity = [1, 1];
 
@@ -52,7 +109,7 @@ cavityDoNotBuild = [
 // it is possible to make multiple custom cavities in the same position, large complex cavities are possible with box types. experement!
 cavityConfig = [
     /*
-    [pos, "type", ["units", x, y], [offset x, offset y], [finger tabs?, width] ]
+    [pos, "type", ["units", x, y], [offset x, offset y], [finger tabs?, Grid_Size_X] ]
     */
   //  [0, "box", ["mm", 50,25], [], [true, 10]],
   //  [1, "box", ["mm", 1,1], [0,-10]]
@@ -76,9 +133,9 @@ $fa = 1;
 $fs = 0.4;
 
 // process variables to ensure accuracy in outermost dimentions
-x = width - lidThickness - lidTolerance;
-y = length - lidThickness - lidTolerance;
-z = height - lidThickness - lidTolerance;
+x = Grid_Size_X - lidThickness - lidTolerance;
+y = Grid_Size_Y - lidThickness - lidTolerance;
+z = Grid_Size_Z - lidThickness - lidTolerance;
 
 lidHeight = z + lidClearence;
 
@@ -86,12 +143,12 @@ lidHeight = z + lidClearence;
 lockingRidgeSpacing = ((z-boxLipHeight)*0.2);
 
 // init grid
-xGridsMM = (x - (wallThickness*2)) / (yGrids);// - ((wallThickness * (yGrids - 1))); //get the size of each grid
-yGridsMM = (y - (wallThickness*2)) / (xGrids);// - ((wallThickness * (xGrids - 1)));
+xGridsMM = (x - (wallThickness*2)) / (Horisontal_Grid_Devisions);// - ((wallThickness * (Horisontal_Grid_Devisions - 1))); //get the size of each grid
+yGridsMM = (y - (wallThickness*2)) / (Vertical_Grid_Devisions);// - ((wallThickness * (Vertical_Grid_Devisions - 1)));
 
 
 // create a vector of vectors describing every point in the grid
-grid = [for (ix=[1:(yGrids)]) for(iy=[1:xGrids]) [(ix), (iy), 0]];
+grid = [for (ix=[1:(Horisontal_Grid_Devisions)]) for(iy=[1:Vertical_Grid_Devisions]) [(ix), (iy), 0]];
 // echo(grid);
 
 
@@ -192,11 +249,11 @@ module Cavity(
         };
         if(cavityType=="cyl")
         {
-            // make the longer of the two sides the length
+            // make the longer of the two sides the Grid_Size_Y
             cylCavityLength = xCavitySize>yCavitySize ? xCavitySize : yCavitySize; 
-            // make the other value the width
+            // make the other value the Grid_Size_X
             cylCavityWidth = cylCavityLength==xCavitySize ? yCavitySize : xCavitySize;
-            // orient the length along the correct axis
+            // orient the Grid_Size_Y along the correct axis
             cylCavityOrient = xCavitySize>yCavitySize ? ORIENT_X : ORIENT_Y;
             
             zmove(z/2)
@@ -226,7 +283,7 @@ function CalcCavitySize (pos, axis) =
 
 module CavityArray()
 {
-    for(i = [0:(xGrids * yGrids)-1]) //build defaults
+    for(i = [0:(Vertical_Grid_Devisions * Horisontal_Grid_Devisions)-1]) //build defaults
     {
         # if(numberGuides==true) {
             FloatingNumberGuides(i);
@@ -422,12 +479,12 @@ module EchoInformation()
 
 EchoInformation();
 
-if(generatedPart=="box") {
+if(generatedPart=="Gridded_Token_Box") {
     //zmove(z/2)
     //zrot(-90) // rotate for better readability
     Box();
 };
-if(generatedPart=="lid") {
+if(generatedPart=="Lid") {
     zflip()
     Lid();
 };
