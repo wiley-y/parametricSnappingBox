@@ -7,11 +7,8 @@
             "boxFillet": "1",
             "boxLipHeight": "5",
             "enforceOuterWall": "false",
-            "generatedPart": "box",
             "lidTolerance": "0.80000000000000004",
-            "lockingRidgeSize": "1",
-            "xGrids": "6",
-            "yGrids": "10"
+            "lockingRidgeSize": "1"
         },
         "New set 2": {
             "$fa": "1",
@@ -19,12 +16,9 @@
             "boxFillet": "1",
             "boxLipHeight": "12",
             "enforceOuterWall": "false",
-            "generatedPart": "box",
             "lidTolerance": "0.80000000000000004",
             "lockingRidgeSize": "1",
-            "numberGuides": "true",
-            "xGrids": "1",
-            "yGrids": "1"
+            "numberGuides": "true"
         },
         "New set 3": {
             "$fa": "1",
@@ -32,12 +26,9 @@
             "boxFillet": "1",
             "boxLipHeight": "10",
             "enforceOuterWall": "false",
-            "generatedPart": "box",
             "lidTolerance": "1.2",
             "lockingRidgeSize": "1.2",
-            "numberGuides": "true",
-            "xGrids": "4",
-            "yGrids": "4"
+            "numberGuides": "true"
         },
         "New set 4": {
             "$fa": "1",
@@ -45,12 +36,9 @@
             "boxFillet": "0",
             "boxLipHeight": "10",
             "enforceOuterWall": "false",
-            "generatedPart": "box",
             "lidTolerance": "1.2",
             "lockingRidgeSize": "1.2",
-            "numberGuides": "true",
-            "xGrids": "4",
-            "yGrids": "4"
+            "numberGuides": "true"
         },
         "New set 5": {
             "$fa": "1",
@@ -58,12 +46,9 @@
             "boxFillet": "0",
             "boxLipHeight": "10",
             "enforceOuterWall": "false",
-            "generatedPart": "box",
             "lidTolerance": "1.2",
             "lockingRidgeSize": "1.2",
-            "numberGuides": "true",
-            "xGrids": "1",
-            "yGrids": "1"
+            "numberGuides": "true"
         },
         "New set 6": {
             "$fa": "1",
@@ -71,12 +56,9 @@
             "boxFillet": "0",
             "boxLipHeight": "10",
             "enforceOuterWall": "false",
-            "generatedPart": "lid",
             "lidTolerance": "1.2",
             "lockingRidgeSize": "1.2",
-            "numberGuides": "true",
-            "xGrids": "4",
-            "yGrids": "4"
+            "numberGuides": "true"
         },
         "New set 7": {
             "$fa": "1",
@@ -86,9 +68,7 @@
             "enforceOuterWall": "false",
             "lidTolerance": "1.2",
             "lockingRidgeSize": "1.2",
-            "numberGuides": "true",
-            "xGrids": "1",
-            "yGrids": "1"
+            "numberGuides": "true"
         },
         "New set 8": {
             "$fa": "1",
@@ -97,12 +77,9 @@
             "boxLipHeight": "10",
             "cylCavityFillet": "0.25",
             "enforceOuterWall": "false",
-            "generatedPart": "box",
             "lidTolerance": "1.2",
             "lockingRidgeSize": "1.2",
-            "numberGuides": "true",
-            "xGrids": "1",
-            "yGrids": "1"
+            "numberGuides": "true"
         },
         "New set 9": {
             "$fa": "1",
@@ -112,15 +89,9 @@
             "calculateCavity": "[1, 1]",
             "cylCavityFillet": "0.25",
             "enforceOuterWall": "false",
-            "generatedPart": "box",
-            "height": "15",
-            "length": "50",
             "lidTolerance": "0.79999999999999993",
             "lockingRidgeSize": "1.6000000000000001",
-            "numberGuides": "true",
-            "width": "50",
-            "xGrids": "1",
-            "yGrids": "1"
+            "numberGuides": "true"
         },
         "New set 10": {
             "$fa": "1",
@@ -130,15 +101,9 @@
             "calculateCavity": "[1, 1]",
             "cylCavityFillet": "0.25",
             "enforceOuterWall": "false",
-            "generatedPart": "lid",
-            "height": "15",
-            "length": "50",
             "lidTolerance": "0.80000000000000004",
             "lockingRidgeSize": "0.40000000000000002",
-            "numberGuides": "true",
-            "width": "50",
-            "xGrids": "1",
-            "yGrids": "1"
+            "numberGuides": "true"
         },
         "New set 11": {
             "$fa": "1",
@@ -148,16 +113,10 @@
             "calculateCavity": "[1, 1]",
             "cylCavityFillet": "0.25",
             "enforceOuterWall": "false",
-            "generatedPart": "lid",
-            "height": "15",
-            "length": "50",
             "lidClearence": "1",
             "lidTolerance": "0.80000000000000004",
             "lockingRidgeSize": "0.5",
-            "numberGuides": "true",
-            "width": "50",
-            "xGrids": "1",
-            "yGrids": "1"
+            "numberGuides": "true"
         },
         "New set 12": {
             "$fa": "1",
@@ -167,16 +126,10 @@
             "calculateCavity": "[1, 1]",
             "cylCavityFillet": "0.25",
             "enforceOuterWall": "false",
-            "generatedPart": "lid",
-            "height": "25",
-            "length": "125",
             "lidClearence": "1",
             "lidTolerance": "0.60000000000000009",
             "lockingRidgeSize": "0.40000000000000002",
-            "numberGuides": "true",
-            "width": "97",
-            "xGrids": "1",
-            "yGrids": "1"
+            "numberGuides": "true"
         },
         "New set 13": {
             "$fa": "1",
@@ -186,18 +139,12 @@
             "calculateCavity": "[1, 1]",
             "cylCavityFillet": "0.25",
             "enforceOuterWall": "false",
-            "generatedPart": "box",
-            "height": "25",
-            "length": "122",
             "lidClearence": "1",
             "lidThickness": "1.5",
             "lidTolerance": "0.59999999999999998",
             "lockingRidgeSize": "0.5",
             "numberGuides": "true",
-            "wallThickness": "0.5",
-            "width": "97",
-            "xGrids": "2",
-            "yGrids": "2"
+            "wallThickness": "0.5"
         },
         "New set 14": {
             "$fa": "1",
@@ -205,22 +152,70 @@
             "boxFillet": "0",
             "boxLipHeight": "8",
             "calculateCavity": "[1, 1]",
-            "cavityDoNotBuild": "[0, 1, 2, 3]",
             "cavityFillet": "0",
             "cylCavityFillet": "0.25",
             "enforceOuterWall": "false",
-            "generatedPart": "box",
-            "height": "25",
-            "length": "122",
             "lidClearence": "1",
             "lidThickness": "1.5",
             "lidTolerance": "0.59999999999999998",
             "lockingRidgeSize": "0.5",
             "numberGuides": "true",
-            "wallThickness": "0.5",
-            "width": "97",
-            "xGrids": "2",
-            "yGrids": "2"
+            "wallThickness": "0.5"
+        },
+        "New set 15": {
+            "$fa": "1",
+            "$fs": "0.40000000000000002",
+            "Default_Grid_Rounding": "0.5",
+            "Default_Grid_Type": "Box",
+            "Eighth_Custom_Grid_Position": "1",
+            "Eighth_Custom_Grid_Size": "[1, 1]",
+            "Eighth_Custom_Grid_Type": "Box",
+            "Fifth_Custom_Grid_Position": "1",
+            "Fifth_Custom_Grid_Size": "[1, 1]",
+            "Fifth_Custom_Grid_Type": "Box",
+            "First_Custom_Grid_Position": "1",
+            "First_Custom_Grid_Size": "[1, 1]",
+            "First_Custom_Grid_Type": "Box",
+            "Fourth_Custom_Grid_Position": "1",
+            "Fourth_Custom_Grid_Size": "[1, 1]",
+            "Fourth_Custom_Grid_Type": "Box",
+            "Grid_Size_X": "140",
+            "Grid_Size_Y": "100",
+            "Grid_Size_Z": "29",
+            "Horisontal_Grid_Devisions": "2",
+            "Lid_Thickness": "1.5",
+            "Ninth_Custom_Grid_Position": "1",
+            "Ninth_Custom_Grid_Size": "[1, 1]",
+            "Ninth_Custom_Grid_Type": "Box",
+            "Outer_Edge_Rounding": "0.5",
+            "Second_Custom_Grid_Position": "1",
+            "Second_Custom_Grid_Size": "[1, 1]",
+            "Second_Custom_Grid_Type": "Box",
+            "Seventh_Custom_Grid_Position": "1",
+            "Seventh_Custom_Grid_Size": "[1, 1]",
+            "Seventh_Custom_Grid_Type": "Box",
+            "Sixth_Custom_Grid_Position": "1",
+            "Sixth_Custom_Grid_Size": "[1, 1]",
+            "Sixth_Custom_Grid_Type": "Box",
+            "Third_Custom_Grid_Position": "1",
+            "Third_Custom_Grid_Size": "[1, 1]",
+            "Third_Custom_Grid_Type": "Box",
+            "Vertical_Grid_Devisions": "4",
+            "Wall_Thickness": "1",
+            "boxFillet": "0",
+            "boxLipHeight": "8",
+            "calculateCavity": "[1, 1]",
+            "cavityDoNotBuild": "[0, 1]",
+            "cavityFillet": "0",
+            "cylCavityFillet": "0.25",
+            "enforceOuterWall": "false",
+            "generatedPart": "none",
+            "lidClearence": "1",
+            "lidThickness": "1.5",
+            "lidTolerance": "0.59999999999999998",
+            "lockingRidgeSize": "0.5",
+            "numberGuides": "true",
+            "wallThickness": "0.5"
         }
     }
 }

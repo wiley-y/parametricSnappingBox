@@ -14,8 +14,8 @@ Grid_Size_X = 140; // 95
 Grid_Size_Y = 100; // 120
 Grid_Size_Z = 29; // 25
 
-Vertical_Grid_Devisions = 2;
 Horisontal_Grid_Devisions = 2;
+Vertical_Grid_Devisions = 2;
 
 Default_Grid_Type = "Box"; //[Box, Scoop]
 Default_Grid_Rounding = 0.5; //[0:0.05:1]
@@ -85,10 +85,7 @@ boxLipHeight=8;
 // the thickness of the walls that separate the cavities 
 wallThickness=0.5;
 
-/* Compartment Customization */
-Vertical_Grid_Devisions = 2;
-// Much of this customization cannot be dont in the left bar, you must edit the code directly
-Horisontal_Grid_Devisions = 2;
+
 // throw example size to echo to calculate the actual size of a cavity
 calculateCavity = [1, 1];
 
@@ -137,14 +134,31 @@ x = Grid_Size_X - lidThickness - lidTolerance;
 y = Grid_Size_Y - lidThickness - lidTolerance;
 z = Grid_Size_Z - lidThickness - lidTolerance;
 
-lidHeight = z + lidClearence;
+//process size variables to create the size of the outer box
+Grid_Size_Vector = concat([Grid_Size_X], [Grid_Size_Y], [Grid_Size_Z]);
+
+function OuterSizeFromGridSize (axis) = 
+    axis == "x" ? //test
+    (Grid_Size_X * Horisontal_Grid_Devisions) + (Wall_Thickness * (Horisontal_Grid_Devisions-1)) + ((Lid_Thickness + lidTolerance) * 2) //true value
+    :
+    axis == "y" ? // false value / second test
+    (Grid_Size_Y * Vertical_Grid_Devisions) + (Wall_Thickness * (Vertical_Grid_Devisions-1)) + ((Lid_Thickness + lidTolerance) * 2) // second true value
+    :
+    axis == "z" ? // third test
+    (Grid_Size_Z + Wall_Thickness + Lid_Thickness + lidTolerance)
+    :
+    undef; // if none pass
+
+x = OuterSizeFromGridSize("x"); // horisontal
+y = OuterSizeFromGridSize("y"); // vertical
+z = OuterSizeFromGridSize("z");
 
 
 lockingRidgeSpacing = ((z-boxLipHeight)*0.2);
 
 // init grid
-xGridsMM = (x - (wallThickness*2)) / (Horisontal_Grid_Devisions);// - ((wallThickness * (Horisontal_Grid_Devisions - 1))); //get the size of each grid
-yGridsMM = (y - (wallThickness*2)) / (Vertical_Grid_Devisions);// - ((wallThickness * (Vertical_Grid_Devisions - 1)));
+//xGridsMM = (x - (wallThickness*2)) / (Horisontal_Grid_Devisions);// - ((wallThickness * (Horisontal_Grid_Devisions - 1))); //get the size of each grid
+//yGridsMM = (y - (wallThickness*2)) / (Vertical_Grid_Devisions);// - ((wallThickness * (Vertical_Grid_Devisions - 1)));
 
 
 // create a vector of vectors describing every point in the grid
