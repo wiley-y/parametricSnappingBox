@@ -21,46 +21,55 @@ Default_Grid_Type = "Box"; //[Box, Scoop]
 Default_Grid_Rounding = 0.5; //[0:0.05:1]
 
 /* [First Custom Grid Settings] */
-First_Custom_Grid_Position = 1;
-First_Custom_Grid_Size = [1, 1];
+First_Custom_Grid_Toggle = true;
+First_Custom_Grid_Position = 0;
+First_Custom_Grid_Size = [2, 2];
 First_Custom_Grid_Type = "Box"; //[Box, Scoop]
 
 /* [Second Custom Grid Settings] */
+Second_Custom_Grid_Toggle = true;
 Second_Custom_Grid_Position = 1;
 Second_Custom_Grid_Size = [1, 1];
 Second_Custom_Grid_Type = "Box"; //[Box, Scoop]
 
 /* [Third Custom Grid Settings] */
+Third_Custom_Grid_Toggle = true;
 Third_Custom_Grid_Position = 1;
 Third_Custom_Grid_Size = [1, 1];
 Third_Custom_Grid_Type = "Box"; //[Box, Scoop]
 
 /* [Fourth Custom Grid Settings] */
+Fourth_Custom_Grid_Toggle = true;
 Fourth_Custom_Grid_Position = 1;
 Fourth_Custom_Grid_Size = [1, 1];
 Fourth_Custom_Grid_Type = "Box"; //[Box, Scoop]
 
 /* [Fifth Custom Grid Settings] */
+Fifth_Custom_Grid_Toggle = true;
 Fifth_Custom_Grid_Position = 1;
 Fifth_Custom_Grid_Size = [1, 1];
 Fifth_Custom_Grid_Type = "Box"; //[Box, Scoop]
 
 /* [Sixth Custom Grid Settings] */
+Sixth_Custom_Grid_Toggle = true;
 Sixth_Custom_Grid_Position = 1;
 Sixth_Custom_Grid_Size = [1, 1];
 Sixth_Custom_Grid_Type = "Box"; //[Box, Scoop]
 
 /* [Seventh Custom Grid Settings] */
+Seventh_Custom_Grid_Toggle = true;
 Seventh_Custom_Grid_Position = 1;
 Seventh_Custom_Grid_Size = [1, 1];
 Seventh_Custom_Grid_Type = "Box"; //[Box, Scoop]
 
 /* [Eighth Custom Grid Settings] */
+Eighth_Custom_Grid_Toggle = true;
 Eighth_Custom_Grid_Position = 1;
 Eighth_Custom_Grid_Size = [1, 1];
 Eighth_Custom_Grid_Type = "Box"; //[Box, Scoop]
 
 /* [Ninth Custom Grid Settings] */
+Ninth_Custom_Grid_Toggle = true;
 Ninth_Custom_Grid_Position = 1;
 Ninth_Custom_Grid_Size = [1, 1];
 Ninth_Custom_Grid_Type = "Box"; //[Box, Scoop]
@@ -148,17 +157,59 @@ y = OuterSizeFromGridSize("y"); // vertical
 z = OuterSizeFromGridSize("z");
 
 // create an array to make the custom grid settings readable
-
 customCavityArray = concat(
-    [[Second_Custom_Grid_Position],      [Second_Custom_Grid_Size],      [Second_Custom_Grid_Type] ], 
-    [[Third_Custom_Grid_Position],       [Third_Custom_Grid_Size],       [Third_Custom_Grid_Type] ], 
-    [[Fourth_Custom_Grid_Position],      [Fourth_Custom_Grid_Size],      [Fourth_Custom_Grid_Type] ], 
-    [[Fifth_Custom_Grid_Position],       [Fifth_Custom_Grid_Size],       [Fifth_Custom_Grid_Type] ], 
-    [[Sixth_Custom_Grid_Position],       [Sixth_Custom_Grid_Size],       [Sixth_Custom_Grid_Type] ], 
-    [[Seventh_Custom_Grid_Position],     [Seventh_Custom_Grid_Size],     [Seventh_Custom_Grid_Type] ], 
-    [[Eighth_Custom_Grid_Position],      [Eighth_Custom_Grid_Size],      [Eighth_Custom_Grid_Type] ], 
-    [[Ninth_Custom_Grid_Position],       [Ninth_Custom_Grid_Size],       [Ninth_Custom_Grid_Type] ] 
+    [ [ First_Custom_Grid_Toggle,     First_Custom_Grid_Position,       First_Custom_Grid_Size,       First_Custom_Grid_Type] ], 
+    [ [ Second_Custom_Grid_Toggle,    Second_Custom_Grid_Position,      Second_Custom_Grid_Size,      Second_Custom_Grid_Type] ], 
+    [ [ Third_Custom_Grid_Toggle,     Third_Custom_Grid_Position,       Third_Custom_Grid_Size,       Third_Custom_Grid_Type] ], 
+    [ [ Fourth_Custom_Grid_Toggle,    Fourth_Custom_Grid_Position,      Fourth_Custom_Grid_Size,      Fourth_Custom_Grid_Type] ], 
+    [ [ Fifth_Custom_Grid_Toggle,     Fifth_Custom_Grid_Position,       Fifth_Custom_Grid_Size,       Fifth_Custom_Grid_Type] ], 
+    [ [ Sixth_Custom_Grid_Toggle,     Sixth_Custom_Grid_Position,       Sixth_Custom_Grid_Size,       Sixth_Custom_Grid_Type] ], 
+    [ [ Seventh_Custom_Grid_Toggle,   Seventh_Custom_Grid_Position,     Seventh_Custom_Grid_Size,     Seventh_Custom_Grid_Type] ], 
+    [ [ Eighth_Custom_Grid_Toggle,    Eighth_Custom_Grid_Position,      Eighth_Custom_Grid_Size,      Eighth_Custom_Grid_Type] ], 
+    [ [ Ninth_Custom_Grid_Toggle,     Ninth_Custom_Grid_Position,       Ninth_Custom_Grid_Size,       Ninth_Custom_Grid_Type] ] 
 );
+
+
+/* // make an array of default boxes to not build
+allCustomCavityPos = [
+    for (i = [0 : len(customCavityArray) - 1])
+        customCavityArray[i][0] == true ? // only add to the array if that custom cavity is enabled
+        customCavityArray[i][1] : undef // if false, set undef
+    ];
+echo("allCustomCavityPos", allCustomCavityPos); */
+
+
+customCavityVerticalSpan = [
+    for(i = [0 : len(customCavityArray) - 1])
+        [for(i2 = [0 : customCavityArray[i][2][1] - 1])
+            customCavityArray[i][0] == true ? // only add to the array if that custom cavity is enabled
+            customCavityArray[i][1] + (1 * i2) : undef // if false, set undef
+        ]
+];
+echo("customCavityVerticalSpan", customCavityVerticalSpan);
+
+customCavityHorisontalSpan = [
+    for(i = [0 : len(customCavityArray) - 1])
+        [for(i2 = [0 : customCavityArray[i][2][0] - 1])
+            for(i3 = [0 : customCavityArray[i][2][1] - 1])
+                customCavityVerticalSpan[i][i3] + (3 * (i2))
+        ]
+    ];
+echo("customCavityHorisontalSpan", customCavityHorisontalSpan);
+
+
+/* echo(
+    [ for(i = [0 : len(customCavityArray) - 1]) { // for loop to create a vector
+        for(i2 = [
+            customCavityArray[i][1] - 1 : customCavityArray[i][2][1] - 1
+            ])
+            customCavityArray[i][0] == true ? // only add to the array if that custom cavity is enabled
+            i2 //customCavityArray[i][1] + (1 * i2)
+            : undef // if custom cavity is not enabled set to undef
+    } ]
+); */
+
+echo(customCavityArray[0][2][1] - 1);
 
 lockingRidgeSpacing = ((z-boxLipHeight)*0.2);
 
@@ -221,7 +272,7 @@ module CavityFingerTab (fingerTabWidth)
     );
 }
 
-module Cavity(
+module TokenBoxCavity(
     cavityPos,  
     xCavitySize,
     yCavitySize, 
@@ -239,20 +290,6 @@ module Cavity(
             0
             ])
     union() {
-        if(cavityType=="box") 
-        {   
-            if(cavityConfig[cavityPos][4][0] != undef) // Finger tabs only on boxes
-                if(cavityConfig[cavityPos][4][0] == true)
-                    for(i = [
-                        [xCavitySize/2, 0, 0],
-                        [0, yCavitySize/2, 0],
-                        [xCavitySize, yCavitySize/2 ,0],
-                        [xCavitySize/2, yCavitySize ,0]
-                    ]) {
-                        move (i)
-                        CavityFingerTab(cavityConfig[cavityPos][4][1]);
-                    };
-
             //echo("box at pos ", cavityPos, " size = ", xCavitySize, yCavitySize);
             zmove(-z/2)
             zmove(wallThickness) // move up for floor
@@ -280,7 +317,6 @@ module Cavity(
                 fillet = cylCavityWidth*(cylCavityFillet),
                 align = V_BACK+V_RIGHT);
         };
-    };
 };
 
 function WhichAxisMM (axis) = axis == 1 ? Grid_Size_X : Grid_Size_Y;
@@ -296,7 +332,7 @@ function CalcCavitySize (pos, axis) =
 
 //echo(CalcCavitySize(0, 1));
 
-module CavityArray()
+module TokenBoxCavityArray()
 {
     for(i = [0:(Vertical_Grid_Devisions * Horisontal_Grid_Devisions)-1]) //build defaults
     {
@@ -310,7 +346,7 @@ module CavityArray()
         if(cavityArrayBlocker != true) 
         { 
             //echo("building default cavity");
-            Cavity(
+            TokenBoxCavity(
                 cavityPos = i,  
                 xCavitySize = CalcDefaultCavitySize(1),
                 yCavitySize = CalcDefaultCavitySize(2), 
@@ -326,7 +362,7 @@ module CavityArray()
         {
             customCavityOffset = cavityConfig[i][3] != [] ? concat(cavityConfig[i][3], [0]) : [0,0,0];
             move(customCavityOffset)
-            Cavity(
+            TokenBoxCavity(
                     cavityPos = cavityConfig[i][0],  
                     xCavitySize = CalcCavitySize(i, 1),
                     yCavitySize = CalcCavitySize(i, 2), 
@@ -404,7 +440,7 @@ module SubdevBox ()
             };
         };
 
-        CavityArray();
+        TokenBoxCavityArray();
     };
 };
 
@@ -476,7 +512,7 @@ module EchoInformation()
     xCavitySizeEcho = (1 * Grid_Size_X) - wallThickness*2;
     yCavitySizeEcho = (1 * Grid_Size_Y) - wallThickness*2;
 
-    echo("----- Interior Cavity Dimentions -----");
+    echo("----- Interior TokenBoxCavity Dimentions -----");
         // default cavity
         echo("The size of a [1, 1] cavity is ", xCavitySizeEcho, " by ", yCavitySizeEcho, " by ", z-lidThickness);
 
@@ -503,11 +539,11 @@ if(generatedPart=="Lid") {
     Lid();
 };
 if(generatedPart=="test"){
-    //CavityArray();
+    //TokenBoxCavityArray();
     SubdevBox();
 
 
-    /* Cavity(
+    /* TokenBoxCavity(
             cavityPos = 1,  
             xCavitySize = 1,
             yCavitySize = 1, 
