@@ -2,19 +2,19 @@
 
 // Which part of the design to show
 // Parts box, deck box
-generatedPart = "Gridded_Token_Box"; // [Gridded_Token_Box, Deck_Box, Lid, none]
+generatedPart = "test"; // [Gridded_Token_Box, Deck_Box, Lid, none]
 
 /* [Global Parameters] */
 Lid_Thickness = 1.5;
 Wall_Thickness = 1;
-Outer_Edge_Rounding = 0.5; //[0:0.05:1]
+Outer_Edge_Rounding = 0; //[0:0.05:1]
 
 /* [Token Box Parameters] */
 Grid_Size_X = 140; // 95
 Grid_Size_Y = 100; // 120
 Grid_Size_Z = 29; // 25
 
-Horisontal_Grid_Devisions = 2;
+Horizontal_Grid_Devisions = 2;
 Vertical_Grid_Devisions = 2;
 
 Default_Grid_Type = "Box"; //[Box, Scoop]
@@ -109,7 +109,7 @@ $fs = 0.4;
 
 module GridSizeWarning (nGridSize, Grid_Size)
 {
-    if(Grid_Size[0] > Horisontal_Grid_Devisions || Grid_Size[1] > Vertical_Grid_Devisions) 
+    if(Grid_Size[0] > Horizontal_Grid_Devisions || Grid_Size[1] > Vertical_Grid_Devisions) 
         echo("Warning : ", nGridSize, "Grid size cannot exceed Grid Devisions");
 }
 GridSizeWarning("First", First_Custom_Grid_Size);
@@ -127,18 +127,30 @@ Grid_Size_Vector = concat([Grid_Size_X], [Grid_Size_Y], [Grid_Size_Z]);
 
 function OuterSizeFromGridSize (axis) = 
     axis == "x" ? //test
-    (Grid_Size_X * Horisontal_Grid_Devisions) + (Wall_Thickness * (Horisontal_Grid_Devisions-1)) + ((Lid_Thickness + lidTolerance) * 2) //true value
+    (Grid_Size_X * Horizontal_Grid_Devisions) + (Wall_Thickness * (Horizontal_Grid_Devisions+1)) + ((Lid_Thickness + lidTolerance) * 2) //true value
     :
     axis == "y" ? // false value / second test
-    (Grid_Size_Y * Vertical_Grid_Devisions) + (Wall_Thickness * (Vertical_Grid_Devisions-1)) + ((Lid_Thickness + lidTolerance) * 2) // second true value
+    (Grid_Size_Y * Vertical_Grid_Devisions) + (Wall_Thickness * (Vertical_Grid_Devisions+1)) + ((Lid_Thickness + lidTolerance) * 2) // second true value
     :
     axis == "z" ? // third test
     (Grid_Size_Z + Wall_Thickness + Lid_Thickness + lidTolerance)
     :
     undef; // if none pass
-x = OuterSizeFromGridSize("x"); // horisontal
-y = OuterSizeFromGridSize("y"); // vertical
-z = OuterSizeFromGridSize("z");
+function InnerBoxFromGridSize (axis) = 
+    axis == "x" ? //test
+    (Grid_Size_X * Horizontal_Grid_Devisions) + (Wall_Thickness * (Horizontal_Grid_Devisions+1))//true value
+    :
+    axis == "y" ? // false value / second test
+    (Grid_Size_Y * Vertical_Grid_Devisions) + (Wall_Thickness * (Vertical_Grid_Devisions+1))// second true value
+    :
+    axis == "z" ? // third test
+    (Grid_Size_Z + Wall_Thickness)
+    :
+    undef; // if none pass
+
+x = InnerBoxFromGridSize("x"); // horisontal
+y = InnerBoxFromGridSize("y"); // vertical
+z = InnerBoxFromGridSize("z");
 
 // create an array to make the custom grid settings readable
 customCavityArray = concat(
@@ -153,8 +165,6 @@ customCavityArray = concat(
     [ [ Ninth_Custom_Grid_Toggle,     Ninth_Custom_Grid_Position,       Ninth_Custom_Grid_Size,       Ninth_Custom_Grid_Type] ] 
 );
 
-
-
 customCavityVerticalSpan = [
     for(i = [0 : len(customCavityArray) - 1])
         [for(i2 = [0 : customCavityArray[i][2][1] - 1])
@@ -166,12 +176,13 @@ customCavityVerticalSpan = [
 
 customCavityDoNotBuild = [
     for(i = [0 : len(customCavityArray) - 1])
-        [for(i2 = [0 : customCavityArray[i][2][0] - 1])
+        for(i2 = [0 : customCavityArray[i][2][0] - 1])
             for(i3 = [0 : customCavityArray[i][2][1] - 1])
-                customCavityVerticalSpan[i][i3] + (3 * (i2))
-        ]
+                customCavityVerticalSpan[i][i3] != undef ?
+                customCavityVerticalSpan[i][i3] + (Vertical_Grid_Devisions * (i2))
+                :undef
     ];
-//echo("customCavityDoNotBuild", customCavityDoNotBuild);
+echo("customCavityDoNotBuild", customCavityDoNotBuild);
 
 
 echo(customCavityArray[0][2][1] - 1);
@@ -179,7 +190,7 @@ echo(customCavityArray[0][2][1] - 1);
 lockingRidgeSpacing = ((z-boxLipHeight)*0.2);
 
 // create an array describing every point in the grid
-grid = [for (ix=[1:(Horisontal_Grid_Devisions)]) for(iy=[1:Vertical_Grid_Devisions]) [(ix), (iy), 0]];
+grid = [for (ix=[0:(Horizontal_Grid_Devisions-1)]) for(iy=[0:Vertical_Grid_Devisions-1]) [(ix), (iy), 0]];
 //echo(grid);
 
 
@@ -222,7 +233,7 @@ module FloatingNumberGuides(cavityPos)
         -grid[0][1] * Grid_Size_Y + (Wall_Thickness),///2 - Wall_Thickness),
         0
         ])
-    zmove(z) ymove(CalcDefaultCavitySize(2)/2) xmove(CalcDefaultCavitySize(1)/2) 
+    zmove(z) ymove(Grid_Size_Y/2) xmove(Grid_Size_X/2) 
     text(textGuide, size = 5, font="Liberation Sans");
 }
 
@@ -245,16 +256,18 @@ module TokenBoxCavity(
     cavityBoxFillet) 
 {
         move([ // move to spot in grid
-            grid[cavityPos][0] * Grid_Size_X,// + Wall_Thickness,
-            grid[cavityPos][1] * Grid_Size_Y,// + Wall_Thickness,
+            (grid[cavityPos][0] * Grid_Size_X) + (Wall_Thickness * (grid[cavityPos][0] + 1)),
+            (grid[cavityPos][1] * Grid_Size_Y) + (Wall_Thickness * (grid[cavityPos][1] + 1)),
             0
         ])
-        move([ // align with box
-            -grid[0][0] * Grid_Size_X + (Wall_Thickness),///2 - Wall_Thickness),
-            -grid[0][1] * Grid_Size_Y + (Wall_Thickness),///2 - Wall_Thickness),
+        /* move([ // align with box
+            -grid[0][0] * Grid_Size_X,// + (Wall_Thickness),///2 - Wall_Thickness),
+            -grid[0][1] * Grid_Size_Y,// + (Wall_Thickness),///2 - Wall_Thickness),
             0
-            ])
+            ]) */
     union() {
+        if(cavityType=="Box")
+        {
             //echo("box at pos ", cavityPos, " size = ", xCavitySize, yCavitySize);
             zmove(-z/2)
             zmove(Wall_Thickness) // move up for floor
@@ -264,7 +277,7 @@ module TokenBoxCavity(
                 edges=EDGES_Z_ALL+EDGES_BOTTOM,
                 center = false);
         };
-        if(cavityType=="cyl")
+        if(cavityType=="Scoop")
         {
             // make the longer of the two sides the Grid_Size_Y
             cylCavityLength = xCavitySize>yCavitySize ? xCavitySize : yCavitySize; 
@@ -282,56 +295,42 @@ module TokenBoxCavity(
                 fillet = cylCavityWidth*(cylCavityFillet),
                 align = V_BACK+V_RIGHT);
         };
+    };
 };
-
-function WhichAxisMM (axis) = axis == 1 ? Grid_Size_X : Grid_Size_Y;
-
-function CalcDefaultCavitySize (axis) = (cavityConfigDefault[2][axis] * WhichAxisMM(axis)) - Wall_Thickness;
-
-function CalcCavitySize (pos, axis) = 
-    cavityConfig[pos][2][0] == "grids" ? //check the units: 1 = x, 2 = y.
-        //if units == "grids" 
-        cavityConfig[pos][2][axis] * (WhichAxisMM(axis)) - Wall_Thickness
-        : //if units == "mm"
-        cavityConfig[pos][2][axis];
-
-//echo(CalcCavitySize(0, 1));
 
 module TokenBoxCavityArray()
 {
-    for(i = [0:(Vertical_Grid_Devisions * Horisontal_Grid_Devisions)-1]) //build defaults
+    for(i = [0:(Vertical_Grid_Devisions * Horizontal_Grid_Devisions)-1]) //build defaults
     {
         # if(numberGuides==true) {
             FloatingNumberGuides(i);
         };
 
         // echo("loop ", i);
-        cavityArrayBlocker = in_list(i, cavityDoNotBuild);
 
-        if(cavityArrayBlocker != true) 
-        { 
-            //echo("building default cavity");
-            TokenBoxCavity(
-                cavityPos = i,  
-                xCavitySize = CalcDefaultCavitySize(1),
-                yCavitySize = CalcDefaultCavitySize(2), 
-                cavityType = Default_Grid_Type,
-                cavityBoxFillet = Default_Grid_Rounding);
-        };
-        
-        if(cavityArrayBlocker == true) echo("did not build default cavity ", cavityDoNotBuild[i]);
+            if(in_list(i, customCavityDoNotBuild) == true) echo("did not build default cavity ", customCavityDoNotBuild[i]);
+            if(in_list(i, customCavityDoNotBuild) != true) 
+            { 
+                //echo("building default cavity");
+                TokenBoxCavity(
+                    cavityPos = i,  
+                    xCavitySize = Grid_Size_X,
+                    yCavitySize = Grid_Size_Y, 
+                    cavityType = Default_Grid_Type,
+                    cavityBoxFillet = Default_Grid_Rounding);
+            };
     };
 
-    for(i = [0:len(cavityConfig)]) { // build custom cavities
-        if(cavityConfig[i][0] != undef)
+    for(i = [0:len(customCavityArray)]) { // build custom cavities
+        if(customCavityArray[i][0] == true)
         {
-            customCavityOffset = cavityConfig[i][3] != [] ? concat(cavityConfig[i][3], [0]) : [0,0,0];
-            move(customCavityOffset)
+            //customCavityOffset = cavityConfig[i][3] != [] ? concat(cavityConfig[i][3], [0]) : [0,0,0];
+            //move(customCavityOffset)
             TokenBoxCavity(
-                    cavityPos = cavityConfig[i][0],  
-                    xCavitySize = CalcCavitySize(i, 1),
-                    yCavitySize = CalcCavitySize(i, 2), 
-                    cavityType = cavityConfig[i][1],
+                    cavityPos = customCavityArray[i][1],  
+                    xCavitySize = customCavityArray[i][1][0],
+                    yCavitySize = customCavityArray[i][1][1], 
+                    cavityType = customCavityArray[i][3],
                     cavityBoxFillet = Default_Grid_Rounding);
         };
     };
@@ -492,7 +491,7 @@ module EchoInformation()
     echo();
 }
 
-EchoInformation();
+//EchoInformation();
 
 if(generatedPart=="Gridded_Token_Box") {
     //zmove(z/2)
@@ -505,7 +504,8 @@ if(generatedPart=="Lid") {
 };
 if(generatedPart=="test"){
     //TokenBoxCavityArray();
-    SubdevBox();
+    //SubdevBox();
+    HollowBox();
 
 
     /* TokenBoxCavity(
