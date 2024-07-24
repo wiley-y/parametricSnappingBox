@@ -513,30 +513,6 @@ module LockingRidge (lockingRidgeTolerance)
         fillet = lockingRidgeSize/2,
         center = true
     );
-
-    /*
-    //x wall edges
-    yscale(1)
-    difference () {
-        cyl(
-            d = x + lockingRidgeSize + lockingRidgeTolerance,
-            h = lockingRidgeSize,
-            fillet = lockingRidgeSize/2
-        );
-        yscale(y*2) FilledBox();
-    };
-
-    //y wall edges
-    xscale(1)
-    difference () {
-        cyl(
-            d = y + lockingRidgeSize + lockingRidgeTolerance,
-            h = lockingRidgeSize,
-            fillet = lockingRidgeSize/2
-        );
-        xscale(x*2) FilledBox();
-    };
-    */
 }
 
 module SubdevBox ()
