@@ -8,8 +8,8 @@ generatedPart = "Gridded_Box"; // [Gridded_Box, Lid, none, test]
 Lid_Thickness = 1.5;
 Wall_Thickness = 1;
 Lid_Height = 1;
-Lid_As_Box_Stand = 5;
-Outer_Edge_Rounding = 0; //[0:0.005:0.15]
+Lid_As_Box_Stand_Height = 5;
+Outer_Edge_Rounding = 0; //[0:0.0001:0.01]
 
 Grid_Size_X = 140; // 95
 Grid_Size_Y = 100; // 120
@@ -20,7 +20,7 @@ Vertical_Grid_Devisions = 1;
 
 Default_Grid_Type = "Box"; //[Box, Deck, Scoop]
 Scoop_Edge_Rounding = 0.25; // [0:0.05:1]
-Box_Edge_Rounding = 0; //[0:0.005:0.15]
+Box_Edge_Rounding = 0; //[0:0.0001:0.01]
 
 Deck_Edge_Opening = 0.8; //[0:0.05:1]
 Deck_Edge_Slope = 0.8; //[0:0.05:1]
@@ -379,7 +379,7 @@ module SlicedCyl(l, d1, d2, fillet1, thickness)
             fillet1 = (l < (d1/2) ? z/2 : (d1/4))
         );
         cuboid(
-            size = ([d2*d1*2, thickness+0.001, d2*d1*2]),
+            size = ([d2*d1*2, thickness+0.01, d2*d1*2]),
             center = true
         );
     };
@@ -557,10 +557,10 @@ module Box ()
         zmove(z/2)
         SubdevBox();
 
-        if(Lid_As_Box_Stand != 0)
+        if(Lid_As_Box_Stand_Height != 0)
                 zmove(boxLipHeight + lidTolerance) // align top with 0
                 move([x/2, y/2, 0]) // align with box
-                zmove(Lid_As_Box_Stand) // move in by the variable amount
+                zmove(Lid_As_Box_Stand_Height) // move in by the variable amount
                 zflip() 
             union() { // tolerance in all directions by adding slightly different scale lids
                 Lid();
@@ -645,7 +645,8 @@ module EchoInformation()
 if(generatedPart=="Gridded_Box") {
     //zmove(z/2)
     //zrot(-90) // rotate for better readability
-    render() Box();
+    render() 
+    Box();
 };
 if(generatedPart=="Lid") {
     zflip()
