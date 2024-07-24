@@ -16,7 +16,7 @@ Grid_Size_Y = 100; // 120
 Grid_Size_Z = 29; // 25
 
 Horizontal_Grid_Devisions = 2;
-Vertical_Grid_Devisions = 2;
+Vertical_Grid_Devisions = 1;
 
 Default_Grid_Type = "Box"; //[Box, Deck, Scoop]
 Scoop_Edge_Rounding = 0.25; // [0:0.05:1]
@@ -26,55 +26,91 @@ Box_Edge_Rounding = 0; //[0:0.005:0.15]
 First_Custom_Grid_Toggle = false;
 First_Custom_Grid_Position = 0;
 First_Custom_Grid_Size = [2, 2];
-First_Custom_Grid_Type = "Box"; //[Box, Scoop]
+First_Custom_Grid_Type = "Box"; //[Box, Scoop, Deck, Fill]
+First_Custom_Deck_Edge_Left = true;
+First_Custom_Deck_Edge_Top = true;
+First_Custom_Deck_Edge_Bottom = true;
+First_Custom_Deck_Edge_Right = true;
 
 /* [Second Custom Grid Settings] */
 Second_Custom_Grid_Toggle = false;
 Second_Custom_Grid_Position = 1;
 Second_Custom_Grid_Size = [1, 1];
-Second_Custom_Grid_Type = "Box"; //[Box, Scoop]
+Second_Custom_Grid_Type = "Box"; //[Box, Scoop, Deck, Fill]
+Second_Custom_Deck_Edge_Left = true;
+Second_Custom_Deck_Edge_Top = true;
+Second_Custom_Deck_Edge_Bottom = true;
+Second_Custom_Deck_Edge_Right = true;
 
 /* [Third Custom Grid Settings] */
 Third_Custom_Grid_Toggle = false;
 Third_Custom_Grid_Position = 1;
 Third_Custom_Grid_Size = [1, 1];
-Third_Custom_Grid_Type = "Box"; //[Box, Scoop]
+Third_Custom_Grid_Type = "Box"; //[Box, Scoop, Deck, Fill]
+Third_Custom_Deck_Edge_Left = true;
+Third_Custom_Deck_Edge_Top = true;
+Third_Custom_Deck_Edge_Bottom = true;
+Third_Custom_Deck_Edge_Right = true;
 
 /* [Fourth Custom Grid Settings] */
 Fourth_Custom_Grid_Toggle = false;
 Fourth_Custom_Grid_Position = 1;
 Fourth_Custom_Grid_Size = [1, 1];
-Fourth_Custom_Grid_Type = "Box"; //[Box, Scoop]
+Fourth_Custom_Grid_Type = "Box"; //[Box, Scoop, Deck, Fill]
+Fourth_Custom_Deck_Edge_Left = true;
+Fourth_Custom_Deck_Edge_Top = true;
+Fourth_Custom_Deck_Edge_Bottom = true;
+Fourth_Custom_Deck_Edge_Right = true;
 
 /* [Fifth Custom Grid Settings] */
 Fifth_Custom_Grid_Toggle = false;
 Fifth_Custom_Grid_Position = 1;
 Fifth_Custom_Grid_Size = [1, 1];
-Fifth_Custom_Grid_Type = "Box"; //[Box, Scoop]
+Fifth_Custom_Grid_Type = "Box"; //[Box, Scoop, Deck, Fill]
+Fifth_Custom_Deck_Edge_Left = true;
+Fifth_Custom_Deck_Edge_Top = true;
+Fifth_Custom_Deck_Edge_Bottom = true;
+Fifth_Custom_Deck_Edge_Right = true;
 
 /* [Sixth Custom Grid Settings] */
 Sixth_Custom_Grid_Toggle = false;
 Sixth_Custom_Grid_Position = 1;
 Sixth_Custom_Grid_Size = [1, 1];
-Sixth_Custom_Grid_Type = "Box"; //[Box, Scoop]
+Sixth_Custom_Grid_Type = "Box"; //[Box, Scoop, Deck, Fill]
+Sixth_Custom_Deck_Edge_Left = true;
+Sixth_Custom_Deck_Edge_Top = true;
+Sixth_Custom_Deck_Edge_Bottom = true;
+Sixth_Custom_Deck_Edge_Right = true;
 
 /* [Seventh Custom Grid Settings] */
 Seventh_Custom_Grid_Toggle = false;
 Seventh_Custom_Grid_Position = 1;
 Seventh_Custom_Grid_Size = [1, 1];
-Seventh_Custom_Grid_Type = "Box"; //[Box, Scoop]
+Seventh_Custom_Grid_Type = "Box"; //[Box, Scoop, Deck, Fill]
+Seventh_Custom_Deck_Edge_Left = true;
+Seventh_Custom_Deck_Edge_Top = true;
+Seventh_Custom_Deck_Edge_Bottom = true;
+Seventh_Custom_Deck_Edge_Right = true;
 
 /* [Eighth Custom Grid Settings] */
 Eighth_Custom_Grid_Toggle = false;
 Eighth_Custom_Grid_Position = 1;
 Eighth_Custom_Grid_Size = [1, 1];
-Eighth_Custom_Grid_Type = "Box"; //[Box, Scoop]
+Eighth_Custom_Grid_Type = "Box"; //[Box, Scoop, Deck, Fill]
+Eighth_Custom_Deck_Edge_Left = true;
+Eighth_Custom_Deck_Edge_Top = true;
+Eighth_Custom_Deck_Edge_Bottom = true;
+Eighth_Custom_Deck_Edge_Right = true;
 
 /* [Ninth Custom Grid Settings] */
 Ninth_Custom_Grid_Toggle = false;
 Ninth_Custom_Grid_Position = 1;
 Ninth_Custom_Grid_Size = [1, 1];
-Ninth_Custom_Grid_Type = "Box"; //[Box, Scoop]
+Ninth_Custom_Grid_Type = "Box"; //[Box, Scoop, Deck, Fill]
+Ninth_Custom_Deck_Edge_Left = true;
+Ninth_Custom_Deck_Edge_Top = true;
+Ninth_Custom_Deck_Edge_Bottom = true;
+Ninth_Custom_Deck_Edge_Right = true;
 
 // controls the outer edges of the box, inner cavity edges are controlled in cavity settings
 boxFillet=0; 
@@ -105,7 +141,7 @@ use <BOSL/shapes.scad>
 use <BOSL/transforms.scad>
 use <BOSL/math.scad>
 
-$fa = 1;
+$fa = $preview ? 20 : 1;
 $fs = 0.4;
 
 module GridSizeWarning (nGridSize, Grid_Size)
@@ -155,15 +191,96 @@ z = InnerBoxFromGridSize("z");
 
 // create an array to make the custom grid settings readable
 customCavityArray = concat(
-    [ [ First_Custom_Grid_Toggle,     First_Custom_Grid_Position,       First_Custom_Grid_Size,       First_Custom_Grid_Type] ], 
-    [ [ Second_Custom_Grid_Toggle,    Second_Custom_Grid_Position,      Second_Custom_Grid_Size,      Second_Custom_Grid_Type] ], 
-    [ [ Third_Custom_Grid_Toggle,     Third_Custom_Grid_Position,       Third_Custom_Grid_Size,       Third_Custom_Grid_Type] ], 
-    [ [ Fourth_Custom_Grid_Toggle,    Fourth_Custom_Grid_Position,      Fourth_Custom_Grid_Size,      Fourth_Custom_Grid_Type] ], 
-    [ [ Fifth_Custom_Grid_Toggle,     Fifth_Custom_Grid_Position,       Fifth_Custom_Grid_Size,       Fifth_Custom_Grid_Type] ], 
-    [ [ Sixth_Custom_Grid_Toggle,     Sixth_Custom_Grid_Position,       Sixth_Custom_Grid_Size,       Sixth_Custom_Grid_Type] ], 
-    [ [ Seventh_Custom_Grid_Toggle,   Seventh_Custom_Grid_Position,     Seventh_Custom_Grid_Size,     Seventh_Custom_Grid_Type] ], 
-    [ [ Eighth_Custom_Grid_Toggle,    Eighth_Custom_Grid_Position,      Eighth_Custom_Grid_Size,      Eighth_Custom_Grid_Type] ], 
-    [ [ Ninth_Custom_Grid_Toggle,     Ninth_Custom_Grid_Position,       Ninth_Custom_Grid_Size,       Ninth_Custom_Grid_Type] ] 
+    [ 
+        [ First_Custom_Grid_Toggle,     
+        First_Custom_Grid_Position,       
+        First_Custom_Grid_Size,       
+        First_Custom_Grid_Type,
+        First_Custom_Deck_Edge_Left,
+        First_Custom_Deck_Edge_Top,
+        First_Custom_Deck_Edge_Bottom,
+        First_Custom_Deck_Edge_Right ] 
+    ], 
+    [ 
+        [ Second_Custom_Grid_Toggle,    
+        Second_Custom_Grid_Position,      
+        Second_Custom_Grid_Size,      
+        Second_Custom_Grid_Type,
+        Second_Custom_Deck_Edge_Left,
+        Second_Custom_Deck_Edge_Top,
+        Second_Custom_Deck_Edge_Bottom,
+        Second_Custom_Deck_Edge_Right ] 
+    ], 
+    [ 
+        [ Third_Custom_Grid_Toggle,     
+        Third_Custom_Grid_Position,       
+        Third_Custom_Grid_Size,       
+        Third_Custom_Grid_Type,
+        Third_Custom_Deck_Edge_Left,
+        Third_Custom_Deck_Edge_Top,
+        Third_Custom_Deck_Edge_Bottom,
+        Third_Custom_Deck_Edge_Right ] 
+    ], 
+    [ 
+        [ Fourth_Custom_Grid_Toggle,    
+        Fourth_Custom_Grid_Position,      
+        Fourth_Custom_Grid_Size,      
+        Fourth_Custom_Grid_Type,
+        Fourth_Custom_Deck_Edge_Left,
+        Fourth_Custom_Deck_Edge_Top,
+        Fourth_Custom_Deck_Edge_Bottom,
+        Fourth_Custom_Deck_Edge_Right ] 
+    ], 
+    [ 
+        [ Fifth_Custom_Grid_Toggle,     
+        Fifth_Custom_Grid_Position,       
+        Fifth_Custom_Grid_Size,       
+        Fifth_Custom_Grid_Type,
+        Fifth_Custom_Deck_Edge_Left,
+        Fifth_Custom_Deck_Edge_Top,
+        Fifth_Custom_Deck_Edge_Bottom,
+        Fifth_Custom_Deck_Edge_Right ] 
+    ], 
+    [ 
+        [ Sixth_Custom_Grid_Toggle,     
+        Sixth_Custom_Grid_Position,       
+        Sixth_Custom_Grid_Size,       
+        Sixth_Custom_Grid_Type,
+        Sixth_Custom_Deck_Edge_Left,
+        Sixth_Custom_Deck_Edge_Top,
+        Sixth_Custom_Deck_Edge_Bottom,
+        Sixth_Custom_Deck_Edge_Right ] 
+    ], 
+    [ 
+        [ Seventh_Custom_Grid_Toggle,   
+        Seventh_Custom_Grid_Position,     
+        Seventh_Custom_Grid_Size,     
+        Seventh_Custom_Grid_Type,
+        Seventh_Custom_Deck_Edge_Left,
+        Seventh_Custom_Deck_Edge_Top,
+        Seventh_Custom_Deck_Edge_Bottom,
+        Seventh_Custom_Deck_Edge_Right ] 
+    ], 
+    [ 
+        [ Eighth_Custom_Grid_Toggle,    
+        Eighth_Custom_Grid_Position,      
+        Eighth_Custom_Grid_Size,      
+        Eighth_Custom_Grid_Type,
+        Eighth_Custom_Deck_Edge_Left,
+        Eighth_Custom_Deck_Edge_Top,
+        Eighth_Custom_Deck_Edge_Bottom,
+        Eighth_Custom_Deck_Edge_Right ] 
+    ], 
+    [ 
+        [ Ninth_Custom_Grid_Toggle,     
+        Ninth_Custom_Grid_Position,       
+        Ninth_Custom_Grid_Size,       
+        Ninth_Custom_Grid_Type,
+        Ninth_Custom_Deck_Edge_Left,
+        Ninth_Custom_Deck_Edge_Top,
+        Ninth_Custom_Deck_Edge_Bottom,
+        Ninth_Custom_Deck_Edge_Right ] 
+    ] 
 );
 
 customCavityVerticalSpan = [
@@ -184,7 +301,6 @@ customCavityDoNotBuild = [
                 :undef
     ];
 echo("customCavityDoNotBuild", customCavityDoNotBuild);
-
 
 echo(customCavityArray[0][2][1] - 1);
 
@@ -235,7 +351,7 @@ module FloatingNumberGuides(cavityPos)
         0
         ])
     zmove(z) ymove(Grid_Size_Y/2) xmove(Grid_Size_X/2) 
-    text(textGuide, size = 5, font="Liberation Sans");
+    linear_extrude(1) text(textGuide, size = 5, font="Liberation Sans");
 }
 
 module CavityFingerTab (fingerTabWidth) 
@@ -249,12 +365,30 @@ module CavityFingerTab (fingerTabWidth)
     );
 }
 
+module SlicedCyl(l, d1, d2, fillet1, thickness)
+{
+    intersection() {
+        //yscale(100)
+        cyl(
+            l = l,
+            d2 = d2,
+            d1 = d1,
+            fillet1 = (l < (d1/2) ? z/2 : (d1/4))
+        );
+        cuboid(
+            size = ([100, thickness+0.001, 100]),
+            center = true
+        );
+    };
+}
+
 module TokenBoxCavity(
     cavityPos,  
     xCavitySize,
     yCavitySize, 
     cavityType,
-    cavityBoxFillet) 
+    cavityBoxFillet,
+    cavityNumber) 
 {
     xCavitySizeMM = (Grid_Size_X * xCavitySize) + (Wall_Thickness * (xCavitySize - 1));
     yCavitySizeMM = (Grid_Size_Y * yCavitySize) + (Wall_Thickness * (yCavitySize - 1));
@@ -268,22 +402,27 @@ module TokenBoxCavity(
     union() {
         if(cavityType=="Box" || cavityType == "Deck")
         {
-            for(i = [
-                [[xCavitySizeMM / 2,    0,                  0], "x"],
-                [[xCavitySizeMM / 2,    yCavitySizeMM,      0], "x"],
-                [[0,                    yCavitySizeMM / 2,  0], "y"],
-                [[xCavitySizeMM,        yCavitySizeMM / 2,  0], "y"]
-            ]) {
-                    move(i[0])
-                    zrot(i[1] == "x" ? 0 : 90) // if x, not rot. if y, 90 degrees rot
-                    zmove((z + Wall_Thickness)/2) zmove(Wall_Thickness)
-                SlicedCyl(
-                    l = z + Wall_Thickness,
-                    d2 = 0.8 * (i[0] == "x" ? xCavitySizeMM : yCavitySizeMM),
-                    d1 = 0.7 * (i[0] == "x" ? xCavitySizeMM : yCavitySizeMM),
-                    fillet1 = (z + Wall_Thickness)/2,
-                    thickness = Wall_Thickness
-                );
+            if(cavityType=="Deck") { // check if deck is enabled
+                sliceThickness = Wall_Thickness + Lid_Thickness + lidTolerance;
+                for(i = [0:3], // count the loop
+                    deckArray = [ // and also encode move array to get the cutouts at the edges of the box
+                    [[xCavitySizeMM / 2,                    -(sliceThickness / 2),                  0], "x", 3], //bottom
+                    [[xCavitySizeMM / 2,                    (sliceThickness / 2) + yCavitySizeMM,   0], "x", 1], //top
+                    [[-(sliceThickness / 2),                yCavitySizeMM / 2,                      0], "y", 2], //left
+                    [[(sliceThickness / 2) + xCavitySizeMM, yCavitySizeMM / 2,                      0], "y", 4]  //right
+                ]) {
+                    if(customCavityArray[cavityNumber][deckArray[2] + 3] == true) {
+                            move(deckArray[0])
+                            zrot(deckArray[1] == "x" ? 0 : 90) // if x, not rot. if y, 90 degrees rot
+                            zmove(Wall_Thickness)
+                        SlicedCyl(
+                            l = z,
+                            d2 = 0.8 * (deckArray[0] == "x" ? xCavitySizeMM : yCavitySizeMM),
+                            d1 = 0.7 * (deckArray[0] == "x" ? xCavitySizeMM : yCavitySizeMM),
+                            thickness = sliceThickness
+                        );
+                    };
+                };
             };
             
             zmove(-z/2)
@@ -322,9 +461,6 @@ module TokenBoxCavityArray()
         # if(numberGuides==true) {
             FloatingNumberGuides(i);
         };
-
-        // echo("loop ", i);
-
             if(in_list(i, customCavityDoNotBuild) == true) echo("did not build default cavity ", customCavityDoNotBuild[i]);
             if(in_list(i, customCavityDoNotBuild) != true) 
             { 
@@ -337,7 +473,6 @@ module TokenBoxCavityArray()
                     cavityBoxFillet = Box_Edge_Rounding * z);
             };
     };
-
     for(i = [0:len(customCavityArray)]) { // build custom cavities
         if(customCavityArray[i][0] == true)
         {
@@ -346,7 +481,8 @@ module TokenBoxCavityArray()
                     xCavitySize = customCavityArray[i][2][0],
                     yCavitySize = customCavityArray[i][2][1], 
                     cavityType = customCavityArray[i][3],
-                    cavityBoxFillet = Box_Edge_Rounding * z);
+                    cavityBoxFillet = Box_Edge_Rounding * z,
+                    cavityNumber = i);
         };
     };
 }
@@ -439,6 +575,8 @@ module AdornedBox()
 module Box ()
 {
     SubdevBox();
+
+    %Lid();
 }
 
 module Lid ()
@@ -507,29 +645,14 @@ module EchoInformation()
     echo();
 }
 
-module SlicedCyl(l, d1, d2, fillet1, thickness)
-{
-    intersection() {
-        //yscale(100)
-        cyl(
-            l = l,
-            d2 = d2,
-            d1 = d1,
-            fillet1 = fillet1
-        );
-        %cuboid(
-            size = ([100, thickness+0.001, 100]),
-            center = true
-        );
-    };
-}
+
 
 //EchoInformation();
 
 if(generatedPart=="Gridded_Box") {
     //zmove(z/2)
     //zrot(-90) // rotate for better readability
-    Box();
+    render() Box();
 };
 if(generatedPart=="Lid") {
     zflip()
