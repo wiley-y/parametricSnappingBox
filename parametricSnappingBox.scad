@@ -10,22 +10,30 @@ Grid_Size_X = 140; // 95
 Grid_Size_Y = 100; // 120
 Grid_Size_Z = 29; // 25
 
-Lid_Tolerance = 0.6;
-Locking_Ridge_Size = 0.5;
-Box_Lip_Height=8; 
-
-Lid_Thickness = 1.5;
-Wall_Thickness = 1;
-Lid_Height = 1;
-Lid_As_Box_Stand_Height = 5;
-Outer_Edge_Rounding = 0; //[0:0.0001:0.01]
-
 Horizontal_Grid_Devisions = 2;
 Vertical_Grid_Devisions = 1;
 
+/* [Lid Parameters] */
+
+Lid_Tolerance = 0.6;
+Locking_Ridge_Size = 0.5;
+Box_Lip_Height=8; 
+Additional_Lid_Height = 1;
+Lid_As_Box_Stand_Height = 5;
+
+/* [Wall Parameters] */
+
+Lid_Thickness = 1.5;
+Wall_Thickness = 1;
+Outer_Edge_Rounding = 0; //[0:0.0001:0.01]
+
+/* [Cavity Settings] */
+
 Default_Grid_Type = "Box"; //[Box, Deck, Scoop]
-Scoop_Edge_Rounding = 0.25; // [0:0.05:1]
 Box_Edge_Rounding = 0; //[0:0.0001:0.01]
+Scoop_Edge_Rounding = 0.25; // [0:0.05:1]
+
+/* [Custom Cavity Settings] */
 
 Deck_Edge_Opening = 0.8; //[0:0.05:1]
 Deck_Edge_Slope = 0.8; //[0:0.05:1]
@@ -119,8 +127,6 @@ Ninth_Custom_Deck_Edge_Left = true;
 Ninth_Custom_Deck_Edge_Top = true;
 Ninth_Custom_Deck_Edge_Bottom = true;
 Ninth_Custom_Deck_Edge_Right = true;
-
-
 
 /* [Additional Options] */
 numberGuides = true;
@@ -565,15 +571,15 @@ module Box ()
 module Lid ()
 {
     difference() {
-            zmove(z/2) zmove(Lid_Height/2) zmove(Lid_Thickness/2) //zmove(-Lid_Tolerance/2)
+            zmove(z/2) zmove(Additional_Lid_Height/2) zmove(Lid_Thickness/2) //zmove(-Lid_Tolerance/2)
         //move([x/2, y/2, 0]) 
         difference() {
             cuboid( // outer shell
                     size = [
                         x + Lid_Thickness*2 + Lid_Tolerance, 
                         y + Lid_Thickness*2 + Lid_Tolerance, 
-                        z + Lid_Height + Lid_Thickness + Lid_Tolerance],
-                        fillet = Outer_Edge_Rounding * z,// * (Lid_Height + Lid_Thickness + Lid_Tolerance),
+                        z + Additional_Lid_Height + Lid_Thickness + Lid_Tolerance],
+                        fillet = Outer_Edge_Rounding * z,// * (Additional_Lid_Height + Lid_Thickness + Lid_Tolerance),
                         edges = EDGES_ALL,
                         center = true);
 
@@ -582,24 +588,24 @@ module Lid ()
                 size = [
                     x + Lid_Tolerance*2, 
                     y + Lid_Tolerance*2, 
-                    z + Lid_Height + Lid_Tolerance*2],
-                    fillet = Box_Edge_Rounding* z,// * (Lid_Height + Lid_Tolerance*2),
+                    z + Additional_Lid_Height + Lid_Tolerance*2],
+                    fillet = Box_Edge_Rounding* z,// * (Additional_Lid_Height + Lid_Tolerance*2),
                     edges = EDGES_Z_ALL + EDGES_BOTTOM);
         };
             zmove(z/2)
             scale([((x + Lid_Tolerance*2) / x), ((y + Lid_Tolerance*2) / y), 1]) 
         AdornedBox();
-        
+
             zmove(z/2)
         LockingRidge(0);
     };
 
             /*
-            zmove(-(Lid_Height/2)) zmove(Box_Lip_Height/2) 
+            zmove(-(Additional_Lid_Height/2)) zmove(Box_Lip_Height/2) 
             zmove(-Lid_Tolerance) zmove(-Lid_Thickness)
             BoxLip(Lid_Tolerance);
 
-            zmove(-(Lid_Height/2)) zmove(Box_Lip_Height/2) zmove((z - Box_Lip_Height) * 0.2)
+            zmove(-(Additional_Lid_Height/2)) zmove(Box_Lip_Height/2) zmove((z - Box_Lip_Height) * 0.2)
             //zmove(-(z - Box_Lip_Height) * 0.2)
             LockingRidge(Lid_Tolerance);
             */
