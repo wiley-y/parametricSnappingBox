@@ -31,7 +31,7 @@ Outer_Edge_Rounding = 0; //[0:0.0001:0.02]
 
 Default_Grid_Type = "Box"; //[Box, Deck, Scoop]
 Box_Edge_Rounding = 0; //[0:0.0001:0.02]
-Scoop_Edge_Rounding = 0.25; // [0:0.05:1]
+Scoop_Edge_Rounding = 0.25; // [0:0.01:0.5]
 
 /* [Custom Cavity Settings] */
 
