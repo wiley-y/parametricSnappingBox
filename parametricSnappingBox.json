@@ -325,7 +325,7 @@
             "calculateCavity": "[1, 1]",
             "cavityFillet": "0",
             "enforceOuterWall": "false",
-            "generatedPart": "test",
+            "generatedPart": "Gridded_Box",
             "lidClearence": "1",
             "lidTolerance": "0.59999999999999998",
             "lockingRidgeSize": "0.5",
