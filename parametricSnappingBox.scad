@@ -399,7 +399,8 @@ module TokenBoxCavity(
             0
         ])
     union() {
-        if(cavityType=="Box" || cavityType == "Deck")
+
+        if(cavityType != "Fill") if(cavityType=="Box" || cavityType == "Deck")
         {
             if(cavityType=="Deck") { // check if deck is enabled
                 sliceThickness = Wall_Thickness + Lid_Thickness + Lid_Tolerance;
