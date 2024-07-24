@@ -550,9 +550,15 @@ module AdornedBox()
 
 module Box ()
 {
-    SubdevBox();
+    difference() {
+        zmove(z/2)
+        SubdevBox();
 
-    %Lid();
+        zmove(boxLipHeight + lidTolerance) // align top with 0
+        move([x/2, y/2, 0])
+        zflip()
+        Lid();
+    };
 }
 
 module Lid ()
