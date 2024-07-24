@@ -2,7 +2,7 @@
 
 // Which part of the design to show
 // Parts box, deck box
-generatedPart = "test"; // [Gridded_Token_Box, Deck_Box, Lid, none]
+generatedPart = "Gridded_Box"; // [Gridded_Box, Lid, none, test]
 
 /* [Global Parameters] */
 Lid_Thickness = 1.5;
@@ -18,7 +18,7 @@ Grid_Size_Z = 29; // 25
 Horizontal_Grid_Devisions = 2;
 Vertical_Grid_Devisions = 2;
 
-Default_Grid_Type = "Box"; //[Box, Scoop]
+Default_Grid_Type = "Box"; //[Box, Deck, Scoop]
 Scoop_Edge_Rounding = 0.25; // [0:0.05:1]
 Box_Edge_Rounding = 0; //[0:0.005:0.15]
 
@@ -266,9 +266,26 @@ module TokenBoxCavity(
             0
         ])
     union() {
-        if(cavityType=="Box")
+        if(cavityType=="Box" || cavityType == "Deck")
         {
-            //echo("box at pos ", cavityPos, " size = ", xCavitySize, yCavitySize);
+            for(i = [
+                [[xCavitySizeMM / 2,    0,                  0], "x"],
+                [[xCavitySizeMM / 2,    yCavitySizeMM,      0], "x"],
+                [[0,                    yCavitySizeMM / 2,  0], "y"],
+                [[xCavitySizeMM,        yCavitySizeMM / 2,  0], "y"]
+            ]) {
+                    move(i[0])
+                    zrot(i[1] == "x" ? 0 : 90) // if x, not rot. if y, 90 degrees rot
+                    zmove((z + Wall_Thickness)/2) zmove(Wall_Thickness)
+                SlicedCyl(
+                    l = z + Wall_Thickness,
+                    d2 = 0.8 * (i[0] == "x" ? xCavitySizeMM : yCavitySizeMM),
+                    d1 = 0.7 * (i[0] == "x" ? xCavitySizeMM : yCavitySizeMM),
+                    fillet1 = (z + Wall_Thickness)/2,
+                    thickness = Wall_Thickness
+                );
+            };
+            
             zmove(-z/2)
             zmove(Wall_Thickness) // move up for floor
             cuboid(
@@ -399,6 +416,11 @@ module SubdevBox ()
 
                 FilledBox();
             };
+
+            if(enforceOuterWall==true) HollowBox();
+    
+            zmove(-(z/2)) zmove(boxLipHeight/2)
+            BoxLip(lidTolerance);
         };
 
         TokenBoxCavityArray();
@@ -417,9 +439,6 @@ module AdornedBox()
 module Box ()
 {
     SubdevBox();
-
-    move([x/2, y/2, 0])
-    AdornedBox();
 }
 
 module Lid ()
@@ -488,9 +507,26 @@ module EchoInformation()
     echo();
 }
 
+module SlicedCyl(l, d1, d2, fillet1, thickness)
+{
+    intersection() {
+        //yscale(100)
+        cyl(
+            l = l,
+            d2 = d2,
+            d1 = d1,
+            fillet1 = fillet1
+        );
+        %cuboid(
+            size = ([100, thickness+0.001, 100]),
+            center = true
+        );
+    };
+}
+
 //EchoInformation();
 
-if(generatedPart=="Gridded_Token_Box") {
+if(generatedPart=="Gridded_Box") {
     //zmove(z/2)
     //zrot(-90) // rotate for better readability
     Box();
@@ -500,21 +536,12 @@ if(generatedPart=="Lid") {
     Lid();
 };
 if(generatedPart=="test"){
-    //TokenBoxCavityArray();
-    //SubdevBox();
-    TokenBoxCavity(
-                    cavityPos = customCavityArray[0][1],  
-                    xCavitySize = customCavityArray[0][1][0],
-                    yCavitySize = customCavityArray[0][1][1], 
-                    cavityType = customCavityArray[0][3],
-                    cavityBoxFillet = Box_Edge_Rounding * z);
-
-
-    /* TokenBoxCavity(
-            cavityPos = 1,  
-            xCavitySize = 1,
-            yCavitySize = 1, 
-            cavityType = "box",
-            cavityBoxFillet = 1); */
+    SlicedCyl(
+        l = z + Wall_Thickness,
+        d2 = 80,
+        d1 = 70,
+        fillet1 = (z + Wall_Thickness)/2,
+        thickness = 1
+    );
 };
 if(generatedPart=="none") {}
