@@ -5,15 +5,20 @@
 generatedPart = "Gridded_Box"; // [Gridded_Box, Lid, none, test]
 
 /* [Global Parameters] */
+
+Grid_Size_X = 140; // 95
+Grid_Size_Y = 100; // 120
+Grid_Size_Z = 29; // 25
+
+Lid_Tolerance = 0.6;
+Locking_Ridge_Size = 0.5;
+Box_Lip_Height=8; 
+
 Lid_Thickness = 1.5;
 Wall_Thickness = 1;
 Lid_Height = 1;
 Lid_As_Box_Stand_Height = 5;
 Outer_Edge_Rounding = 0; //[0:0.0001:0.01]
-
-Grid_Size_X = 140; // 95
-Grid_Size_Y = 100; // 120
-Grid_Size_Z = 29; // 25
 
 Horizontal_Grid_Devisions = 2;
 Vertical_Grid_Devisions = 1;
@@ -115,22 +120,7 @@ Ninth_Custom_Deck_Edge_Top = true;
 Ninth_Custom_Deck_Edge_Bottom = true;
 Ninth_Custom_Deck_Edge_Right = true;
 
-// controls the outer edges of the box, inner cavity edges are controlled in cavity settings
-boxFillet=0; 
- // the rounding of the cylindrical containers
-cavityFillet = 0;
 
-// how much taller the lid is than the box, open space between box and lid interior
-lidClearence = 1;
-// how much room will be added between the box and the lid for 3d printing
-lidTolerance = 0.6;
-// the size of the protrusions that hold the lid in place
-lockingRidgeSize = 0.5;
-// how high the lower box/lid landing extends up the box
-boxLipHeight=8; 
-
-// throw example size to echo to calculate the actual size of a cavity
-calculateCavity = [1, 1];
 
 /* [Additional Options] */
 numberGuides = true;
@@ -167,13 +157,13 @@ Grid_Size_Vector = concat([Grid_Size_X], [Grid_Size_Y], [Grid_Size_Z]);
 
 function OuterSizeFromGridSize (axis) = 
     axis == "x" ? //test
-    (Grid_Size_X * Horizontal_Grid_Devisions) + (Wall_Thickness * (Horizontal_Grid_Devisions+1)) + ((Lid_Thickness + lidTolerance) * 2) //true value
+    (Grid_Size_X * Horizontal_Grid_Devisions) + (Wall_Thickness * (Horizontal_Grid_Devisions+1)) + ((Lid_Thickness + Lid_Tolerance) * 2) //true value
     :
     axis == "y" ? // false value / second test
-    (Grid_Size_Y * Vertical_Grid_Devisions) + (Wall_Thickness * (Vertical_Grid_Devisions+1)) + ((Lid_Thickness + lidTolerance) * 2) // second true value
+    (Grid_Size_Y * Vertical_Grid_Devisions) + (Wall_Thickness * (Vertical_Grid_Devisions+1)) + ((Lid_Thickness + Lid_Tolerance) * 2) // second true value
     :
     axis == "z" ? // third test
-    (Grid_Size_Z + Wall_Thickness + Lid_Thickness + lidTolerance)
+    (Grid_Size_Z + Wall_Thickness + Lid_Thickness + Lid_Tolerance)
     :
     undef; // if none pass
 function InnerBoxFromGridSize (axis) = 
@@ -307,7 +297,7 @@ echo("customCavityDoNotBuild", customCavityDoNotBuild);
 
 echo(customCavityArray[0][2][1] - 1);
 
-lockingRidgeSpacing = ((z-boxLipHeight)*0.2);
+lockingRidgeSpacing = ((z-Box_Lip_Height)*0.2);
 
 // create an array describing every point in the grid
 grid = [for (ix=[0:(Horizontal_Grid_Devisions-1)]) for(iy=[0:Vertical_Grid_Devisions-1]) [(ix), (iy), 0]];
@@ -406,7 +396,7 @@ module TokenBoxCavity(
         if(cavityType=="Box" || cavityType == "Deck")
         {
             if(cavityType=="Deck") { // check if deck is enabled
-                sliceThickness = Wall_Thickness + Lid_Thickness + lidTolerance;
+                sliceThickness = Wall_Thickness + Lid_Thickness + Lid_Tolerance;
                 for(i = [0:3], // count the loop
                     deckArray = [ // and also encode move array to get the cutouts at the edges of the box
                     [[xCavitySizeMM / 2,                    -(sliceThickness / 2),                  0], "x", 3], //bottom
@@ -496,7 +486,7 @@ module BoxLip (boxLipTolerance)
         size=[
             x + Lid_Thickness*2 + boxLipTolerance,
             y + Lid_Thickness*2 + boxLipTolerance,
-            boxLipHeight + (boxLipTolerance*2),
+            Box_Lip_Height + (boxLipTolerance*2),
         ],
         fillet=Outer_Edge_Rounding * z,
         edges=EDGES_ALL
@@ -505,15 +495,15 @@ module BoxLip (boxLipTolerance)
 
 module LockingRidge (lockingRidgeTolerance)
 {
-    zmove(-(z/2)) zmove(boxLipHeight + (lockingRidgeSize)) zmove((z - boxLipHeight) * 0.2)
-    zmove(lockingRidgeSize/2)
+    zmove(-(z/2)) zmove(Box_Lip_Height + (Locking_Ridge_Size)) zmove((z - Box_Lip_Height) * 0.2)
+    zmove(Locking_Ridge_Size/2)
     cuboid(
         size = [
-            x + (lockingRidgeTolerance * 2) + (lockingRidgeSize * 2),
-            y + (lockingRidgeTolerance * 2) + (lockingRidgeSize * 2), 
-            lockingRidgeSize
+            x + (lockingRidgeTolerance * 2) + (Locking_Ridge_Size * 2),
+            y + (lockingRidgeTolerance * 2) + (Locking_Ridge_Size * 2), 
+            Locking_Ridge_Size
         ],
-        fillet = lockingRidgeSize/2,
+        fillet = Locking_Ridge_Size/2,
         center = true
     );
 }
@@ -526,7 +516,7 @@ module SubdevBox ()
             FilledBox();
 
             difference() {
-                //zmove(-(z/2)) zmove(boxLipHeight + (lockingRidgeSize)) zmove((z - boxLipHeight) * 0.2)
+                //zmove(-(z/2)) zmove(Box_Lip_Height + (Locking_Ridge_Size)) zmove((z - Box_Lip_Height) * 0.2)
                 LockingRidge(0);
 
                 FilledBox();
@@ -534,8 +524,8 @@ module SubdevBox ()
 
             if(enforceOuterWall==true) HollowBox();
     
-            zmove(-(z/2)) zmove(boxLipHeight/2)
-            BoxLip(lidTolerance);
+            zmove(-(z/2)) zmove(Box_Lip_Height/2)
+            BoxLip(Lid_Tolerance);
         };
 
         TokenBoxCavityArray();
@@ -546,8 +536,8 @@ module AdornedBox()
 {
     if(enforceOuterWall==true) HollowBox();
     
-    zmove(-(z/2)) zmove(boxLipHeight/2)
-    BoxLip(lidTolerance);
+    zmove(-(z/2)) zmove(Box_Lip_Height/2)
+    BoxLip(Lid_Tolerance);
 
 }
 
@@ -558,15 +548,15 @@ module Box ()
         SubdevBox();
 
         if(Lid_As_Box_Stand_Height != 0)
-                zmove(boxLipHeight + lidTolerance) // align top with 0
+                zmove(Box_Lip_Height + Lid_Tolerance) // align top with 0
                 move([x/2, y/2, 0]) // align with box
                 zmove(Lid_As_Box_Stand_Height) // move in by the variable amount
                 zflip() 
             union() { // tolerance in all directions by adding slightly different scale lids
                 Lid();
-                scale([((x + lidTolerance*2) / x), ((y + lidTolerance*2) / y), 1])
+                scale([((x + Lid_Tolerance*2) / x), ((y + Lid_Tolerance*2) / y), 1])
                 Lid();
-                scale([-((x + lidTolerance*2) / x), -((y + lidTolerance*2) / y), 1])
+                scale([-((x + Lid_Tolerance*2) / x), -((y + Lid_Tolerance*2) / y), 1])
                 Lid();
             };
     };
@@ -575,29 +565,29 @@ module Box ()
 module Lid ()
 {
     difference() {
-            zmove(z/2) zmove(Lid_Height/2) zmove(Lid_Thickness/2) //zmove(-lidTolerance/2)
+            zmove(z/2) zmove(Lid_Height/2) zmove(Lid_Thickness/2) //zmove(-Lid_Tolerance/2)
         //move([x/2, y/2, 0]) 
         difference() {
             cuboid( // outer shell
                     size = [
-                        x + Lid_Thickness*2 + lidTolerance, 
-                        y + Lid_Thickness*2 + lidTolerance, 
-                        z + Lid_Height + Lid_Thickness + lidTolerance],
-                        fillet = Outer_Edge_Rounding * z,// * (Lid_Height + Lid_Thickness + lidTolerance),
+                        x + Lid_Thickness*2 + Lid_Tolerance, 
+                        y + Lid_Thickness*2 + Lid_Tolerance, 
+                        z + Lid_Height + Lid_Thickness + Lid_Tolerance],
+                        fillet = Outer_Edge_Rounding * z,// * (Lid_Height + Lid_Thickness + Lid_Tolerance),
                         edges = EDGES_ALL,
                         center = true);
 
             zmove(-Lid_Thickness) // make room for floor
             cuboid( // inner mask
                 size = [
-                    x + lidTolerance*2, 
-                    y + lidTolerance*2, 
-                    z + Lid_Height + lidTolerance*2],
-                    fillet = Box_Edge_Rounding* z,// * (Lid_Height + lidTolerance*2),
+                    x + Lid_Tolerance*2, 
+                    y + Lid_Tolerance*2, 
+                    z + Lid_Height + Lid_Tolerance*2],
+                    fillet = Box_Edge_Rounding* z,// * (Lid_Height + Lid_Tolerance*2),
                     edges = EDGES_Z_ALL + EDGES_BOTTOM);
         };
             zmove(z/2)
-            scale([((x + lidTolerance*2) / x), ((y + lidTolerance*2) / y), 1]) 
+            scale([((x + Lid_Tolerance*2) / x), ((y + Lid_Tolerance*2) / y), 1]) 
         union() {
             AdornedBox();
             LockingRidge(0);
@@ -605,13 +595,13 @@ module Lid ()
     };
 
             /*
-            zmove(-(Lid_Height/2)) zmove(boxLipHeight/2) 
-            zmove(-lidTolerance) zmove(-Lid_Thickness)
-            BoxLip(lidTolerance);
+            zmove(-(Lid_Height/2)) zmove(Box_Lip_Height/2) 
+            zmove(-Lid_Tolerance) zmove(-Lid_Thickness)
+            BoxLip(Lid_Tolerance);
 
-            zmove(-(Lid_Height/2)) zmove(boxLipHeight/2) zmove((z - boxLipHeight) * 0.2)
-            //zmove(-(z - boxLipHeight) * 0.2)
-            LockingRidge(lidTolerance);
+            zmove(-(Lid_Height/2)) zmove(Box_Lip_Height/2) zmove((z - Box_Lip_Height) * 0.2)
+            //zmove(-(z - Box_Lip_Height) * 0.2)
+            LockingRidge(Lid_Tolerance);
             */
     //};
 }
