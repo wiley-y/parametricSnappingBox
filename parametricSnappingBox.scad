@@ -588,10 +588,10 @@ module Lid ()
         };
             zmove(z/2)
             scale([((x + Lid_Tolerance*2) / x), ((y + Lid_Tolerance*2) / y), 1]) 
-        union() {
-            AdornedBox();
-            LockingRidge(0);
-        }
+        AdornedBox();
+        
+            zmove(z/2)
+        LockingRidge(0);
     };
 
             /*
