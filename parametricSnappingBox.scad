@@ -25,12 +25,12 @@ Lid_As_Box_Stand_Height = 5;
 
 Lid_Thickness = 1.5;
 Wall_Thickness = 1;
-Outer_Edge_Rounding = 0; //[0:0.0001:0.01]
+Outer_Edge_Rounding = 0; //[0:0.0001:0.02]
 
 /* [Cavity Settings] */
 
 Default_Grid_Type = "Box"; //[Box, Deck, Scoop]
-Box_Edge_Rounding = 0; //[0:0.0001:0.01]
+Box_Edge_Rounding = 0; //[0:0.0001:0.02]
 Scoop_Edge_Rounding = 0.25; // [0:0.05:1]
 
 /* [Custom Cavity Settings] */
@@ -406,15 +406,15 @@ module TokenBoxCavity(
                 for(i = [0:3], // count the loop
                     deckArray = [ // and also encode move array to get the cutouts at the edges of the box
                     [[xCavitySizeMM / 2,                    -(sliceThickness / 2),                  0], "x", 3], //bottom
-                    [[xCavitySizeMM / 2,                    (sliceThickness / 2) + yCavitySizeMM,   0], "x", 1], //top
-                    [[-(sliceThickness / 2),                yCavitySizeMM / 2,                      0], "y", 2], //left
+                    [[xCavitySizeMM / 2,                    (sliceThickness / 2) + yCavitySizeMM,   0], "x", 2], //left
+                    [[-(sliceThickness / 2),                yCavitySizeMM / 2,                      0], "y", 1], //top
                     [[(sliceThickness / 2) + xCavitySizeMM, yCavitySizeMM / 2,                      0], "y", 4]  //right
                 ]) {
                     if(customCavityArray[cavityNumber][deckArray[2] + 3] == true) {
                             move(deckArray[0])
                             zrot(deckArray[1] == "x" ? 0 : 90) // if x, not rot. if y, 90 degrees rot
                             zmove(Wall_Thickness)
-                        SlicedCyl(
+                        SlicedCyl( // build the cutouts at deckArray positions
                             l = z,
                             d2 = Deck_Edge_Opening * (deckArray[1] == "x" ? xCavitySizeMM : yCavitySizeMM),
                             d1 = (Deck_Edge_Opening * Deck_Edge_Slope) * (deckArray[1] == "x" ? xCavitySizeMM : yCavitySizeMM),
