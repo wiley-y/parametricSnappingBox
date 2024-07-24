@@ -299,9 +299,9 @@ customCavityDoNotBuild = [
                 customCavityVerticalSpan[i][i3] + (Vertical_Grid_Devisions * (i2))
                 :undef
     ];
-echo("customCavityDoNotBuild", customCavityDoNotBuild);
+//echo("customCavityDoNotBuild", customCavityDoNotBuild);
 
-echo(customCavityArray[0][2][1] - 1);
+//echo(customCavityArray[0][2][1] - 1);
 
 lockingRidgeSpacing = ((z-Box_Lip_Height)*0.2);
 
@@ -391,7 +391,7 @@ module TokenBoxCavity(
 {
     xCavitySizeMM = (Grid_Size_X * xCavitySize) + (Wall_Thickness * (xCavitySize - 1));
     yCavitySizeMM = (Grid_Size_Y * yCavitySize) + (Wall_Thickness * (yCavitySize - 1));
-    echo(xCavitySize);
+    //echo(xCavitySize);
 
         move([ // move to spot in grid
             (grid[cavityPos][0] * Grid_Size_X) + (Wall_Thickness * (grid[cavityPos][0] + 1)),
@@ -600,44 +600,18 @@ module Lid ()
             zmove(z/2)
         LockingRidge(0);
     };
-
-            /*
-            zmove(-(Additional_Lid_Height/2)) zmove(Box_Lip_Height/2) 
-            zmove(-Lid_Tolerance) zmove(-Lid_Thickness)
-            BoxLip(Lid_Tolerance);
-
-            zmove(-(Additional_Lid_Height/2)) zmove(Box_Lip_Height/2) zmove((z - Box_Lip_Height) * 0.2)
-            //zmove(-(z - Box_Lip_Height) * 0.2)
-            LockingRidge(Lid_Tolerance);
-            */
-    //};
 }
 
 module EchoInformation() 
 {
     echo();
-
-    xCavitySizeEcho = (1 * Grid_Size_X) - Wall_Thickness*2;
-    yCavitySizeEcho = (1 * Grid_Size_Y) - Wall_Thickness*2;
-
-    echo("----- Interior TokenBoxCavity Dimentions -----");
-        // default cavity
-        echo("The size of a [1, 1] cavity is ", xCavitySizeEcho, " by ", yCavitySizeEcho, " by ", z-Lid_Thickness);
-
-        // custom calculations
-        if(calculateCavity==undef) echo("To calculate a larger box please enter a size into cavlulateCavity");
-        if(calculateCavity!=undef) {
-            echo(
-                "The size of a ", calculateCavity, " cavity is ", 
-                calculateCavity[0] * xCavitySizeEcho, " by ", calculateCavity[1] * yCavitySizeEcho, " by ", z-Lid_Thickness);
-        };
+    echo("The external dimentions of the box in MM are ... ");
+    echo("X =  ", x);
+    echo("Y =  ", y);
+    echo("Z =  ", z);
 
     echo();
 }
-
-
-
-//EchoInformation();
 
 if(generatedPart=="Gridded_Box") {
     //zmove(z/2)
@@ -659,3 +633,5 @@ if(generatedPart=="test"){
     );
 };
 if(generatedPart=="none") {}
+
+EchoInformation();
