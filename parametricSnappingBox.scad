@@ -310,11 +310,11 @@ grid = [for (ix=[0:(Horizontal_Grid_Devisions-1)]) for(iy=[0:Vertical_Grid_Devis
 //echo(grid);
 
 
-module FilledBox()
+module FilledBox(filledBoxSize)
 {
     subdevBoxEdges = EDGES_TOP + EDGES_Z_ALL + EDGES_BOTTOM;
     cuboid(
-        size=[x,y,z],
+        size=filledBoxSize,
         fillet=Outer_Edge_Rounding * z,
         edges=subdevBoxEdges);
 }
@@ -322,7 +322,7 @@ module FilledBox()
 module HollowBox() {
     difference() 
     {
-        FilledBox();
+        FilledBox(filledBoxSize = [x,y,z]);
 
             zmove(z/2) zmove(Wall_Thickness)
         cuboid(
@@ -416,7 +416,7 @@ module TokenBoxCavity(
                             zrot(deckArray[1] == "x" ? 0 : 90) // if x, not rot. if y, 90 degrees rot
                             zmove(Wall_Thickness)
                         SlicedCyl( // build the cutouts at deckArray positions
-                            l = z,
+                            l = z + Wall_Thickness,
                             d2 = Deck_Edge_Opening * (deckArray[1] == "x" ? xCavitySizeMM : yCavitySizeMM),
                             d1 = (Deck_Edge_Opening * Deck_Edge_Slope) * (deckArray[1] == "x" ? xCavitySizeMM : yCavitySizeMM),
                             thickness = sliceThickness
@@ -520,13 +520,13 @@ module SubdevBox ()
     difference() {
         move([x/2, y/2, 0]) 
         union() {
-            FilledBox();
+            FilledBox(filledBoxSize = [x,y,z]);
 
             difference() {
                 //zmove(-(z/2)) zmove(Box_Lip_Height + (Locking_Ridge_Size)) zmove((z - Box_Lip_Height) * 0.2)
                 LockingRidge(0);
 
-                FilledBox();
+                FilledBox(filledBoxSize = [x,y,z]);
             };
 
             if(enforceOuterWall==true) HollowBox();
@@ -555,16 +555,11 @@ module Box ()
         SubdevBox();
 
         if(Lid_As_Box_Stand_Height != 0)
-                zmove(Box_Lip_Height + Lid_Tolerance) // align top with 0
-                move([x/2, y/2, 0]) // align with box
-                zmove(Lid_As_Box_Stand_Height) // move in by the variable amount
-                zflip() 
-            union() { // tolerance in all directions by adding slightly different scale lids
-                Lid();
-                scale([((x + Lid_Tolerance*2) / x), ((y + Lid_Tolerance*2) / y), 1])
-                Lid();
-                scale([-((x + Lid_Tolerance*2) / x), -((y + Lid_Tolerance*2) / y), 1])
-                Lid();
+            move([x/2, y/2, -z/2]) // align with box
+            zmove(Lid_As_Box_Stand_Height) // move in by the variable amount
+            difference() {
+                FilledBox(filledBoxSize = [x*2 ,y*2 , z - 0.01]);
+                FilledBox(filledBoxSize = [x,y,z]);
             };
     };
 }
@@ -572,33 +567,32 @@ module Box ()
 module Lid ()
 {
     difference() {
-            zmove(z/2) zmove(Additional_Lid_Height/2) zmove(Lid_Thickness/2) //zmove(-Lid_Tolerance/2)
-        //move([x/2, y/2, 0]) 
-        difference() {
-            cuboid( // outer shell
-                    size = [
+        zmove(z/2) zmove(Additional_Lid_Height/2) zmove(Lid_Thickness/2) //zmove(-Lid_Tolerance/2)
+    difference() {
+        cuboid( // outer shell
+                size = [
                         x + Lid_Thickness*2 + Lid_Tolerance, 
                         y + Lid_Thickness*2 + Lid_Tolerance, 
                         z + Additional_Lid_Height + Lid_Thickness + Lid_Tolerance],
-                        fillet = Outer_Edge_Rounding * z,// * (Additional_Lid_Height + Lid_Thickness + Lid_Tolerance),
-                        edges = EDGES_ALL,
-                        center = true);
+                    fillet = Outer_Edge_Rounding * z,// * (Additional_Lid_Height + Lid_Thickness + Lid_Tolerance),
+                    edges = EDGES_ALL,
+                    center = true);
 
-            zmove(-Lid_Thickness) // make room for floor
-            cuboid( // inner mask
-                size = [
+        zmove(-Lid_Thickness) // make room for floor
+        cuboid( // inner mask
+            size = [
                     x + Lid_Tolerance*2, 
                     y + Lid_Tolerance*2, 
                     z + Additional_Lid_Height + Lid_Tolerance*2],
-                    fillet = Box_Edge_Rounding* z,// * (Additional_Lid_Height + Lid_Tolerance*2),
-                    edges = EDGES_Z_ALL + EDGES_BOTTOM);
-        };
+                fillet = Box_Edge_Rounding* z,// * (Additional_Lid_Height + Lid_Tolerance*2),
+                edges = EDGES_Z_ALL + EDGES_BOTTOM);
+    };
             zmove(z/2)
             scale([((x + Lid_Tolerance*2) / x), ((y + Lid_Tolerance*2) / y), 1]) 
         AdornedBox();
 
             zmove(z/2)
-        LockingRidge(0);
+            LockingRidge(0);
     };
 }
 
