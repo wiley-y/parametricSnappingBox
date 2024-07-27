@@ -19,7 +19,7 @@ Lid_Tolerance = 0.6;
 Locking_Ridge_Size = 0.5;
 Box_Lip_Height=8; 
 Additional_Lid_Height = 1;
-Lid_As_Box_Stand_Height = 5;
+Lid_As_Box_Stand_Height = 5; //0.1
 
 /* [Wall Parameters] */
 
@@ -338,9 +338,9 @@ module HollowBox() {
     };
 };
 
-fontSize = (x * y) * 0.0005;
+fontSize = (x) * 0.04;
 
-module FloatingNumberGuides(cavityPos) 
+module FloatingNumberGuides(cavityPos, xCavitySize, yCavitySize, dimentions) 
 {
     textGuide = str(cavityPos);
     move([ // move to spot in grid
@@ -354,12 +354,32 @@ module FloatingNumberGuides(cavityPos)
         0
         ])
     zmove(z) ymove(Grid_Size_Y/2) xmove(Grid_Size_X/2) 
-    linear_extrude(1) text(
+    {
+    //position number
+    linear_extrude(1) text( 
         textGuide, 
         size = fontSize, 
         font = "Liberation Sans",
         halign = "center",
         valign = "center");
+    if(dimentions == true) {
+        //y dimention
+        linear_extrude(1) text( 
+            str("y:", (Grid_Size_Y * yCavitySize) + (Wall_Thickness * (yCavitySize-1)), "mm  "), 
+            size = fontSize * 0.5, 
+            font = "Liberation Sans",
+            halign = "right",
+            valign = "center");
+        //x dimention
+        ymove(-fontSize * 0.7 * 1.2)
+        linear_extrude(1) text( 
+            str("x:", (Grid_Size_X * xCavitySize) + (Wall_Thickness * (xCavitySize-1)), "mm  "), 
+            size = fontSize * 0.5, 
+            font = "Liberation Sans",
+            halign = "center",
+            valign = "top");
+    }
+    };
 }
 
 module floatingDimentionGuides() 
@@ -368,7 +388,7 @@ module floatingDimentionGuides()
         ymove(y / 2) //move to middle of line
         xmove(-x * 0.05) //move away from the box
     linear_extrude(1) text(
-        str("y : ", y, "mm"), 
+        str("y : ", y + (Lid_Thickness*2) + (Lid_Tolerance*2), "mm"), 
         size = fontSize, 
         font = "Liberation Sans",
         halign = "right",
@@ -378,7 +398,7 @@ module floatingDimentionGuides()
         xmove(x / 2) //move to middle of line
         ymove(-y * 0.05) //move away from the box
     linear_extrude(1) text(
-        str("x : ", x, "mm"), 
+        str("x : ", x + (Lid_Thickness*2) + (Lid_Tolerance*2), "mm"), 
         size = fontSize, 
         font = "Liberation Sans",
         halign = "center",
@@ -388,7 +408,7 @@ module floatingDimentionGuides()
         ymove(-y * 0.05) //move away from the box
         xmove(-x * 0.05) //move away from the box
     linear_extrude(1) text(
-        str("z : ", z + Additional_Lid_Height, "mm"), 
+        str("z : ", z + Additional_Lid_Height + Lid_Thickness, "mm"), 
         size = fontSize, 
         font = "Liberation Sans",
         halign = "right",
@@ -500,9 +520,6 @@ module TokenBoxCavityArray()
 {
     for(i = [0:(Vertical_Grid_Devisions * Horizontal_Grid_Devisions)-1]) //build defaults
     {
-        # if(numberGuides==true) {
-            FloatingNumberGuides(i);
-        };
             if(in_list(i, customCavityDoNotBuild) == true) echo("did not build default cavity ", customCavityDoNotBuild[i]);
             if(in_list(i, customCavityDoNotBuild) != true) 
             { 
@@ -513,6 +530,14 @@ module TokenBoxCavityArray()
                     yCavitySize = 1, 
                     cavityType = Default_Grid_Type,
                     cavityBoxFillet = Box_Edge_Rounding * z);
+                
+                # if(numberGuides==true) {
+                    FloatingNumberGuides(
+                        cavityPos = i, 
+                        xCavitySize = 1, 
+                        yCavitySize = 1,
+                        dimentions = false);
+                };
             };
     };
     for(i = [0:len(customCavityArray)]) { // build custom cavities
@@ -525,6 +550,14 @@ module TokenBoxCavityArray()
                     cavityType = customCavityArray[i][3],
                     cavityBoxFillet = Box_Edge_Rounding * z,
                     cavityNumber = i);
+            
+            # if(numberGuides==true) {
+                    FloatingNumberGuides(
+                        cavityPos = customCavityArray[i][1], 
+                        xCavitySize = customCavityArray[i][2][0], 
+                        yCavitySize = customCavityArray[i][2][1],
+                        dimentions = true);
+            };
         };
     };
 }
@@ -671,6 +704,6 @@ if(generatedPart=="test"){
 };
 if(generatedPart=="none") {}
 
-#floatingDimentionGuides();
+%floatingDimentionGuides();
 
-EchoInformation();
+//EchoInformation();
