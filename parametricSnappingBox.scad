@@ -6,9 +6,9 @@ generatedPart = "Gridded_Box"; // [Gridded_Box, Lid, none, test]
 
 /* [Global Parameters] */
 
-Grid_Size_X = 140; // 95
-Grid_Size_Y = 100; // 120
-Grid_Size_Z = 29; // 25
+Grid_Size_X = 140; 
+Grid_Size_Y = 100; // 0.1
+Grid_Size_Z = 29; 
 
 Horizontal_Grid_Devisions = 2;
 Vertical_Grid_Devisions = 1;
@@ -188,6 +188,8 @@ x = InnerBoxFromGridSize("x"); // horisontal
 y = InnerBoxFromGridSize("y"); // vertical
 z = InnerBoxFromGridSize("z");
 
+zTrueDimentions = z + Additional_Lid_Height;
+
 // create an array to make the custom grid settings readable
 customCavityArray = concat(
     [ 
@@ -336,6 +338,8 @@ module HollowBox() {
     };
 };
 
+fontSize = (x * y) * 0.0005;
+
 module FloatingNumberGuides(cavityPos) 
 {
     textGuide = str(cavityPos);
@@ -350,7 +354,45 @@ module FloatingNumberGuides(cavityPos)
         0
         ])
     zmove(z) ymove(Grid_Size_Y/2) xmove(Grid_Size_X/2) 
-    linear_extrude(1) text(textGuide, size = 5, font="Liberation Sans");
+    linear_extrude(1) text(
+        textGuide, 
+        size = fontSize, 
+        font = "Liberation Sans",
+        halign = "center",
+        valign = "center");
+}
+
+module floatingDimentionGuides() 
+{
+    //y dimentions
+        ymove(y / 2) //move to middle of line
+        xmove(-x * 0.05) //move away from the box
+    linear_extrude(1) text(
+        str("y : ", y, "mm"), 
+        size = fontSize, 
+        font = "Liberation Sans",
+        halign = "right",
+        valign = "bottom");
+
+    //x dimentions
+        xmove(x / 2) //move to middle of line
+        ymove(-y * 0.05) //move away from the box
+    linear_extrude(1) text(
+        str("x : ", x, "mm"), 
+        size = fontSize, 
+        font = "Liberation Sans",
+        halign = "center",
+        valign = "top");
+
+    //z dimentions
+        ymove(-y * 0.05) //move away from the box
+        xmove(-x * 0.05) //move away from the box
+    linear_extrude(1) text(
+        str("z : ", z + Additional_Lid_Height, "mm"), 
+        size = fontSize, 
+        font = "Liberation Sans",
+        halign = "right",
+        valign = "top");
 }
 
 module CavityFingerTab (fingerTabWidth) 
@@ -602,10 +644,11 @@ module EchoInformation()
     echo("The external dimentions of the box in MM are ... ");
     echo("X =  ", x);
     echo("Y =  ", y);
-    echo("Z =  ", z);
+    echo("Z =  ", z + Additional_Lid_Height);
 
     echo();
 }
+
 
 if(generatedPart=="Gridded_Box") {
     //zmove(z/2)
@@ -627,5 +670,7 @@ if(generatedPart=="test"){
     );
 };
 if(generatedPart=="none") {}
+
+#floatingDimentionGuides();
 
 EchoInformation();
