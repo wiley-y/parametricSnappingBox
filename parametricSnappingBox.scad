@@ -564,15 +564,16 @@ module TokenBoxCavityArray()
 
 module BoxLip (boxLipTolerance) 
 {
-    cuboid(
-        size=[
-            x + Lid_Thickness*2 + boxLipTolerance,
-            y + Lid_Thickness*2 + boxLipTolerance,
-            Box_Lip_Height + (boxLipTolerance*2),
-        ],
-        fillet=Outer_Edge_Rounding * z,
-        edges=EDGES_ALL
-    );
+    if(Box_Lip_Height != 0)
+        cuboid(
+            size=[
+                x + Lid_Thickness*2 + boxLipTolerance,
+                y + Lid_Thickness*2 + boxLipTolerance,
+                Box_Lip_Height + (boxLipTolerance*2),
+            ],
+            fillet=Outer_Edge_Rounding * z,
+            edges=EDGES_ALL
+        );
 };
 
 module LockingRidge (lockingRidgeTolerance)
